@@ -3,6 +3,28 @@
     <router-view />
   </div>
 </template>
+<script>
+export default {
+  mounted () {
+    // const scrollFunc = function (e) {
+    //   e = e || window.event
+    //   if (e && e.preventDefault) {
+    //     e.preventDefault()
+    //     e.stopPropagation()
+    //   } else {
+    //     e.returnvalue = false
+    //     return false
+    //   }
+    // }
+    // document.body.addEventListener(
+    //   'mousewheel',
+    //   scrollFunc,
+    //   { passive: false }
+    // )
+  }
+}
 
-<style lang="less">
+</script>
+
+<style>
 </style>
