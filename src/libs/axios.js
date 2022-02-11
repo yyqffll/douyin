@@ -3,8 +3,6 @@ axios.interceptors.response.use((res) => {
   const {
     data
   } = res
-  if (data.success) {
-    return data
-  }
+  return data
 })
 export default axios

@@ -10,8 +10,15 @@ import './global.less'
 import VueAwesomeSwiper from 'vue-awesome-swiper'
 import 'swiper/dist/css/swiper.css'
 
+import PopModal from '_c/PopModal'
+
+import SvgIcon from '_c/SvgIcon'
+
 Vue.prototype.$axios = axios
 Vue.use(VueAwesomeSwiper)
+
+Vue.component('PopModal', PopModal)
+Vue.component('SvgIcon', SvgIcon)
 
 new Vue({
   router,

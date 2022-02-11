@@ -1,3 +1,4 @@
+const config = require('./src/config')
 const path = require('path')
 const resolve = dir => {
   return path.join(__dirname, dir)
@@ -11,11 +12,8 @@ module.exports = {
   devServer: {
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: config.baseUrl,
         changeOrigin: true
-        // pathRewrite: {
-        //   '^/api': ''
-        // }
       }
     }
   }

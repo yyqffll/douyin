@@ -1,9 +1,7 @@
 <template>
   <div class="side-menu">
     <div class="logo">
-      <svg class="icon" aria-hidden="true">
-        <use xlink:href="#icon-douyin" />
-      </svg>
+      <SvgIcon url="#icon-douyin"></SvgIcon>
       <span class="title">抖音</span>
     </div>
     <div class="menu">
@@ -14,9 +12,7 @@
         @click="gotoPage(item)"
       >
         <template v-if="item.title !== '虎年'">
-          <svg class="icon" aria-hidden="true">
-            <use :xlink:href="item.svg" />
-          </svg>
+          <SvgIcon :url="item.svg"></SvgIcon>
           <p>{{item.title}}</p>
         </template>
         <template v-else>
@@ -133,7 +129,6 @@ export default {
     flex-direction: column;
     padding-bottom: 60px;
     overflow-y: scroll;
-    outline: none;
     &::-webkit-scrollbar {
       display: none;
     }
@@ -171,6 +166,7 @@ export default {
       }
     }
     .menu {
+      overflow: hidden;
       .menu-item {
         display: flex;
         flex-direction: row;

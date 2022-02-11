@@ -1,17 +1,22 @@
 <template>
-  <div class="video-player">
+  <div class="video-player" ref="videoPlayer">
     <div class="video-container">
-      <video width="100%" :autoplay="false" :src="option.src"></video>
+      <video width="100%" :src="option.src"></video>
     </div>
-    <div class="controls">
-      <div class="time-line">shijianxian</div>
+    <div ref="controls" class="controls">
+      <div class="time-line">
+        <div class="time-played"></div>
+      </div>
       <div class="inner-controls">
         <div class="basic">
-          <button>开始</button>
+          <div class="button">
+            <SvgIcon url="#icon-kaishi" @click="play" v-if="status === false"></SvgIcon>
+            <SvgIcon url="#icon-zanting" @click="pause" v-else></SvgIcon>
+          </div>
           <div class="time">
-            <span></span>
+            <span>{{currentTime}}</span>
             <span>/</span>
-            <span></span>
+            <span>{{durationTimer}}</span>
           </div>
         </div>
         <div class="other">
@@ -32,12 +37,65 @@
 </template>
 
 <script>
+import { mod } from '@/libs/utils'
 export default {
   props: {
     option: {
       default: null,
       type: Object,
       require: true
+    }
+  },
+  data () {
+    return {
+      status: false,
+      playedWidth: 0,
+      currentTime: 0,
+      durationTimer: 0,
+      timer: null
+    }
+  },
+  computed: {
+    videoPlayer () {
+      return this.$refs.videoPlayer
+    },
+    video () {
+      return this.videoPlayer.querySelector('video')
+    }
+  },
+  mounted () {
+  },
+  methods: {
+    played () {
+      this.timer = setInterval(() => {
+        this.playedWidth = mod(this.video.currentTime, this.video.duration) * 100
+        const timePlayed = this.videoPlayer.querySelector('.time-played')
+        timePlayed.style.width = this.playedWidth + '%'
+        if (this.video.ended) {
+          clearInterval(this.timer)
+          this.playedWidth = 0
+          timePlayed.style.width = 0
+          this.status = false
+        }
+      }, 500)
+    },
+    init () {
+      this.video.currentTime = 0
+    },
+    play () {
+      this.video.play()
+      this.played()
+      this.status = true
+    },
+    pause () {
+      this.video.pause()
+      this.status = false
+    },
+    load () {
+      this.video.load()
+    },
+    openVoice () {
+      this.video.muted = false
     }
   }
 }
@@ -46,14 +104,19 @@ export default {
 <style lang="less" scoped>
 .video-player {
   position: relative;
+  width: 100%;
+  height: 100%;
   .video-container {
     width: 100%;
     height: 100%;
     display: flex;
     align-items: center;
     position: absolute;
-    top: 0;
     z-index: 999;
+    video {
+      width: 100%;
+      transform: translateY(-30px);
+    }
   }
   .video-player-bg {
     width: 100%;
@@ -69,11 +132,8 @@ export default {
   .controls {
     width: 100%;
     position: absolute;
-    bottom: 0;
+    bottom: 0px;
     z-index: 999;
-    .time-line {
-      position: absolute;
-    }
     .inner-controls {
       display: flex;
       justify-content: space-between;
@@ -81,6 +141,16 @@ export default {
       height: 80px;
       .basic {
         display: inherit;
+      }
+    }
+    .time-line {
+      position: absolute;
+      width: 100%;
+      height: 2px;
+      background: #7a7778;
+      .time-played {
+        height: 2px;
+        background: white;
       }
     }
   }

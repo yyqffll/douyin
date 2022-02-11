@@ -7,6 +7,7 @@
 export default {
   mounted () {
     // const scrollFunc = function (e) {
+    //   console.log(e, 'e')
     //   e = e || window.event
     //   if (e && e.preventDefault) {
     //     e.preventDefault()

@@ -13,14 +13,13 @@ export default {
     SideMenu,
     MainLayout
   },
-  mounted () {
-    this.$axios.post('/api/user')
-  }
 }
 </script>
 
 <style lang="less" scoped>
 .main {
+  width: 100%;
+  height: 100%;
   display: flex;
 }
 </style>

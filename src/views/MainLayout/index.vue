@@ -2,15 +2,13 @@
   <div class="main-layout">
     <header class="header">
       <div class="search">
-        <svg class="icon" aria-hidden="true">
-          <use xlink:href="#icon-sousuo" />
-        </svg>
+        <SvgIcon url="#icon-sousuo"></SvgIcon>
         <form>
           <input
             class="input"
             type="text"
             placeholder="搜索你感兴趣的内容"
-            @click="clickInput"
+            @click="handleSearch"
             @keyup.enter="onSubmit"
             v-model="searchValue"
           />
@@ -24,19 +22,15 @@
                 <span class="btn">{{item.btn}}</span>
               </template>
               <template v-else>
-                <svg class="icon" aria-hidden="true">
-                  <use xlink:href="#icon-shanchu" />
-                </svg>
+                <SvgIcon url="#icon-shanchu"></SvgIcon>
               </template>
             </div>
           </div>
         </div>
       </div>
       <div class="search-other">
-        <div class="login">登录</div>
-        <svg class="icon" aria-hidden="true" @mouseenter="menuItemShow = true" @mouseleave="leave">
-          <use xlink:href="#icon-caidan" />
-        </svg>
+        <div class="login" @click="handleLogin">登录</div>
+        <SvgIcon url="#icon-caidan" @mouseenter="menuItemShow = true" @mouseleave="leave"></SvgIcon>
         <div
           class="menu"
           v-if="menuItemShow"
@@ -53,15 +47,13 @@
             @mouseenter="mouseenter(item.title)"
             @mouseleave="mouseleave(item.title)"
           >
-            <svg class="icon" aria-hidden="true">
-              <use :xlink:href="item.svg" />
-            </svg>
+            <SvgIcon :url="item.svg"></SvgIcon>
             <span>{{item.title}}</span>
           </div>
         </div>
       </div>
       <div class="search-other-other">
-        <div class="meun-item">登录</div>
+        <div class="meun-item" @click="handleLogin">登录</div>
         <div
           class="menu"
           @mouseenter="enter"
@@ -77,9 +69,7 @@
             @mouseenter="mouseenter(item.title)"
             @mouseleave="mouseleave(item.title)"
           >
-            <svg class="icon" aria-hidden="true">
-              <use :xlink:href="item.svg" />
-            </svg>
+            <SvgIcon :url="item.svg"></SvgIcon>
             <span>{{item.title}}</span>
           </div>
         </div>
@@ -88,12 +78,17 @@
     <div class="main-content">
       <router-view />
     </div>
+    <LoginModal v-model="loginModalParams.show"></LoginModal>
   </div>
 </template>
 
 <script>
+import LoginModal from '_c/LoginModal'
 export default {
   name: 'MainLayout',
+  components: {
+    LoginModal
+  },
   data () {
     return {
       searchHistory: [
@@ -117,7 +112,11 @@ export default {
         }
       ],
       menuItemShow: false,
-      menuItemEnter: false
+      menuItemEnter: false,
+
+      loginModalParams: {
+        show: false
+      }
     }
   },
   mounted () {
@@ -144,7 +143,7 @@ export default {
         this.showHistory = false
       }
     },
-    clickInput () {
+    handleSearch () {
       this.showHistory = true
       this.searchHistory = [
         {
@@ -170,7 +169,7 @@ export default {
         list.splice(list.indexOf(title), 1)
         window.localStorage.setItem('searchHistory', Array.from(new Set(list)).toString())
       }
-      this.clickInput()
+      this.handleSearch()
     },
     onSubmit () {
       if (!this.searchValue) {
@@ -205,7 +204,11 @@ export default {
           item.svg = item.tem
         }
       })
-    }
+    },
+
+    handleLogin () {
+      this.loginModalParams.show = true
+    },
   }
 }
 </script>
@@ -213,7 +216,8 @@ export default {
 <style lang="less" scoped>
 .main-layout {
   min-width: 600px;
-  flex-grow: 1;
+  height: 100%;
+  flex: 1;
   .header {
     display: flex;
     align-items: center;
@@ -259,6 +263,7 @@ export default {
       .search-history {
         position: absolute;
         top: 50px;
+        z-index: 9999;
         width: 100%;
         background: #292b35;
         color: #fff;
@@ -322,6 +327,8 @@ export default {
       .menu {
         position: absolute;
         top: 50px;
+        z-index: 9999;
+
         overflow: hidden;
         background: #292b35;
         padding: 10px 20px 0px;
@@ -362,10 +369,6 @@ export default {
   .main-content {
     height: calc(100vh - 60px);
     padding: 0 32px 0 22px;
-    & > div:first-child {
-      width: 100%;
-      height: 100%;
-    }
   }
 }
 @media (min-width: 1240px) {
