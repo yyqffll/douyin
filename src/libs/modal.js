@@ -23,7 +23,6 @@ export const noticeModal = function (props = {}, onOk = null, timeout = 5000) {
   }).$mount()
   document.body.appendChild(instance.$el)
   timer = setTimeout(() => {
-    console.log('chufa')
     document.body.removeChild(instance.$el)
   }, timeout)
 }

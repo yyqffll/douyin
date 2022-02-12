@@ -8,7 +8,9 @@ axios.interceptors.response.use((res) => {
     noticeModal({
       msg: data.msg
     })
+    return Promise.reject(data)
+  } else {
+    return data
   }
-  return data
 })
 export default axios

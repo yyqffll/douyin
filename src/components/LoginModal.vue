@@ -145,9 +145,10 @@ export default {
       if (this.handleLoading) {
         return
       }
+      const param = { userName: this.params.userName, userPwd: this.params.userPwd }
       if (this.type === 'login') {
         this.handleLoading = true
-        this.login({ userName: this.params.userName, userPwd: this.params.userPwd }).then(res => {
+        this.login(param).then(res => {
           this.handleLoading = false
           this.handleCancel()
           this.$openNoticeModal({ msg: res.msg })
@@ -164,7 +165,7 @@ export default {
         } else {
           this.passwordCS = false
         }
-        this.$axios.post('/api/user/sign').then(res => {
+        this.$axios.post('/api/user/sign', param).then(res => {
           this.registerSuccess()
         }).catch(res => {
           this.handleLoading = false
