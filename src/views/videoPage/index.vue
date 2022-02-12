@@ -11,10 +11,6 @@
 <script>
 import { swiper, swiperSlide } from 'vue-awesome-swiper'
 import VideoPlayer from '@/components/VideoPlayer'
-import video1 from '@/assets/1.mp4'
-import video2 from '@/assets/2.mp4'
-
-import video1Img from '@/assets/1.png'
 
 export default {
   name: 'videoPage',
@@ -27,14 +23,12 @@ export default {
     return {
       videoLists: [
         {
-          src: video1,
-          img: video1Img,
-          id: '001'
+          src: '',
+          img: '',
         },
         {
-          src: video2,
-          img: video1Img,
-          id: '002'
+          src: '',
+          img: '',
         }
       ],
       swiperOption: {

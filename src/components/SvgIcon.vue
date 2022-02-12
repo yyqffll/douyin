@@ -16,5 +16,10 @@ export default {
 }
 </script>
 
-<style>
+<style lang="less" scoped>
+.icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 </style>

@@ -11,12 +11,9 @@
         :class="{'menu-item': true, 'menu-item-active': menuItemActive === item.title}"
         @click="gotoPage(item)"
       >
-        <template v-if="item.title !== '虎年'">
+        <template>
           <SvgIcon :url="item.svg"></SvgIcon>
           <p>{{item.title}}</p>
-        </template>
-        <template v-else>
-          <img :src="item.svg" />
         </template>
       </div>
     </div>
@@ -24,7 +21,7 @@
 </template>
 
 <script>
-import trigger from '@/assets/trigger.svg'
+// import trigger from '@/assets/trigger.svg'
 export default {
   name: 'SideMenu',
   data () {
@@ -51,10 +48,6 @@ export default {
         {
           title: '热点',
           svg: '#icon-redian'
-        },
-        {
-          title: '虎年',
-          svg: trigger
         },
         {
           title: '娱乐',
@@ -87,7 +80,11 @@ export default {
         {
           title: '音乐',
           svg: '#icon-yinyue'
-        }
+        },
+        // {
+        //   title: '虎年',
+        //   svg: trigger
+        // },
       ],
       menuItemActive: '推荐'
     }

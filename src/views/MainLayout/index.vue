@@ -28,49 +28,52 @@
           </div>
         </div>
       </div>
-      <div class="search-other">
-        <div class="login" @click="handleLogin">登录</div>
-        <SvgIcon url="#icon-caidan" @mouseenter="menuItemShow = true" @mouseleave="leave"></SvgIcon>
-        <div
-          class="menu"
-          v-if="menuItemShow"
-          @mouseenter="enter"
-          @mouseleave="() => {
-            menuItemShow = false
-            menuItemEnter = false
-          }"
-        >
-          <div
-            v-for="item in menuItem"
-            :key="item.title"
-            class="meun-item"
-            @mouseenter="mouseenter(item.title)"
-            @mouseleave="mouseleave(item.title)"
-          >
-            <SvgIcon :url="item.svg"></SvgIcon>
-            <span>{{item.title}}</span>
+      <div class="header-main">
+        <div class="operate-other" :class="{'operate-other-token': token}">
+          <div class="menu">
+            <div
+              v-for="item in menuItem"
+              :key="item.title"
+              class="meun-item"
+              @mouseenter="itemMouseenter(item.title)"
+              @mouseleave="itemMouseleave(item.title)"
+            >
+              <SvgIcon :url="item.svg"></SvgIcon>
+              <span>{{item.title}}</span>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="search-other-other">
-        <div class="meun-item" @click="handleLogin">登录</div>
-        <div
-          class="menu"
-          @mouseenter="enter"
-          @mouseleave="() => {
-            menuItemShow = false
-            menuItemEnter = false
-          }"
-        >
-          <div
-            v-for="item in menuItem"
-            :key="item.title"
-            class="meun-item"
-            @mouseenter="mouseenter(item.title)"
-            @mouseleave="mouseleave(item.title)"
-          >
-            <SvgIcon :url="item.svg"></SvgIcon>
-            <span>{{item.title}}</span>
+        <div class="user" v-if="token">
+          <img :src="douyin" />
+          <div class="user-detail">
+            <div class="user-inf">
+              <div v-for="item in userItem" :key="item.title">
+                <SvgIcon :url="item.url"></SvgIcon>
+                <p style="font-weight: 600; color: #fff;">{{item.total}}</p>
+                <p style="font-size: 12px;">{{item.title}}</p>
+              </div>
+            </div>
+            <div class="user-operate">
+              <span>个人主页</span>
+              <span>更换头像</span>
+              <span @click="handleLoginOut">退出登录</span>
+            </div>
+          </div>
+        </div>
+        <div class="login" @click="handleLogin" v-else>登录</div>
+        <div class="operate">
+          <SvgIcon class="menu-icon" url="#icon-caidan"></SvgIcon>
+          <div class="menu">
+            <div
+              v-for="item in menuItem"
+              :key="item.title"
+              class="meun-item"
+              @mouseenter="itemMouseenter(item.title)"
+              @mouseleave="itemMouseleave(item.title)"
+            >
+              <SvgIcon :url="item.svg"></SvgIcon>
+              <span>{{item.title}}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -78,11 +81,13 @@
     <div class="main-content">
       <router-view />
     </div>
-    <LoginModal v-model="loginModalParams.show"></LoginModal>
+    <LoginModal v-model="loginModalShow"></LoginModal>
   </div>
 </template>
 
 <script>
+import douyin from '@/assets/douyin.jpeg'
+import { mapState, mapActions } from 'vuex'
 import LoginModal from '_c/LoginModal'
 export default {
   name: 'MainLayout',
@@ -99,6 +104,27 @@ export default {
       ],
       showHistory: false,
       searchValue: '',
+
+      douyin: douyin,
+
+      userItem: [
+        {
+          url: '#icon-shipin',
+          title: '我的作品',
+          total: 0
+        },
+        {
+          url: '#icon-xihuan',
+          title: '我的喜欢',
+          total: 0
+        },
+        {
+          url: '#icon-shoucang',
+          title: '我的收藏',
+          total: 0
+        }
+      ],
+
       menuItem: [
         {
           title: '发布视频',
@@ -111,13 +137,14 @@ export default {
           tem: '#icon-qianbi'
         }
       ],
-      menuItemShow: false,
-      menuItemEnter: false,
 
-      loginModalParams: {
-        show: false
-      }
+      loginModalShow: false
     }
+  },
+  computed: {
+    ...mapState({
+      token: state => state.token,
+    })
   },
   mounted () {
     document.addEventListener('click', this.checkClick)
@@ -126,6 +153,7 @@ export default {
     document.removeEventListener('clicl', this.checkClick)
   },
   methods: {
+    ...mapActions(['loginOut']),
     checkClick (event) {
       const input = document.querySelector('.input')
       const btn = Array.from(document.querySelectorAll('.btn-icon'))
@@ -181,24 +209,15 @@ export default {
       window.localStorage.setItem('searchHistory', Array.from(new Set(list)).toString())
       this.showHistory = false
     },
-    leave () {
-      setTimeout(() => {
-        if (!this.menuItemEnter) {
-          this.menuItemShow = false
-        }
-      }, 100)
-    },
-    enter () {
-      this.menuItemEnter = true
-    },
-    mouseenter (title) {
+
+    itemMouseenter (title) {
       this.menuItem.forEach(item => {
         if (item.title === title) {
           item.svg = '#icon-xiangxia'
         }
       })
     },
-    mouseleave (title) {
+    itemMouseleave (title) {
       this.menuItem.forEach(item => {
         if (item.title === title) {
           item.svg = item.tem
@@ -207,15 +226,20 @@ export default {
     },
 
     handleLogin () {
-      this.loginModalParams.show = true
+      this.loginModalShow = true
     },
+    handleLoginOut () {
+      this.$openNoticeModal({ msg: '是否确认退出登录?' }, this.loginOut)
+    },
+
+    handleOperate () { },
   }
 }
 </script>
 
 <style lang="less" scoped>
 .main-layout {
-  min-width: 600px;
+  min-width: 300px;
   height: 100%;
   flex: 1;
   .header {
@@ -299,13 +323,77 @@ export default {
         }
       }
     }
-    .search-other {
+    .header-main {
       position: relative;
       display: flex;
       flex-direction: row;
       align-items: center;
-      width: 100px;
       justify-content: flex-end;
+      height: 32px;
+      .user {
+        position: absolute;
+        top: 0;
+        right: 37px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        &:hover {
+          .user-detail {
+            display: flex;
+          }
+        }
+        img {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          border: 1px solid #292b35;
+          margin-bottom: 10px;
+          box-sizing: border-box;
+        }
+        .user-detail {
+          display: none;
+          background: #292b35;
+          flex-direction: column;
+          border-radius: 5px;
+          .user-inf {
+            display: flex;
+            border-bottom: 1px solid #000000;
+            div {
+              cursor: pointer;
+              padding: 25px 30px 10px;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
+              &:hover {
+                p {
+                  color: #fff;
+                }
+              }
+              .icon {
+                font-size: 32px;
+                margin-bottom: 5px;
+              }
+              p {
+                white-space: nowrap;
+              }
+            }
+          }
+          .user-operate {
+            padding: 10px 30px;
+            display: flex;
+            justify-content: space-around;
+            span {
+              cursor: pointer;
+              font-size: 14px;
+              &:hover {
+                color: #fff;
+              }
+            }
+          }
+        }
+      }
       .login {
         width: 32px;
         height: 32px;
@@ -315,55 +403,70 @@ export default {
         line-height: 32px;
         background: rgba(255, 0, 76, 0.911);
         color: #fff;
-        margin-right: 10px;
+        margin-right: 37px;
         cursor: pointer;
       }
-      .icon {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        cursor: pointer;
-      }
-      .menu {
+      .operate {
         position: absolute;
-        top: 50px;
         z-index: 9999;
-
-        overflow: hidden;
-        background: #292b35;
-        padding: 10px 20px 0px;
-        width: 100%;
+        top: 0;
         display: flex;
-        align-items: center;
         flex-direction: column;
-        color: #fff;
-        .meun-item {
-          width: 100%;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          white-space: nowrap;
-          margin-bottom: 10px;
-          background: black;
-          border: 2px solid #fff;
-          border-radius: 5px;
-          cursor: pointer;
-          &:hover {
-            animation: menu-item-width 1s;
-            .icon {
-              animation: menu-item-icon 1s;
-              animation-fill-mode: forwards;
-            }
+        align-items: flex-end;
+        &:hover {
+          z-index: 9998;
+          .menu {
+            display: flex;
           }
-          .icon {
-            width: 14px;
-            margin-right: 5px;
+          .user-detail {
+            display: none;
+          }
+        }
+        .menu-icon {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          cursor: pointer;
+          margin-bottom: 10px;
+        }
+        .menu {
+          width: 100px;
+          overflow: hidden;
+          background: #292b35;
+          padding: 10px 20px 0px;
+          display: none;
+          align-items: center;
+          flex-direction: column;
+          color: #fff;
+          .meun-item {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            white-space: nowrap;
+            width: 100%;
+            height: 32px;
+            margin-bottom: 10px;
+            background: #000000;
+            border: 2px solid #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            &:hover {
+              animation: menu-item-width 1s;
+              .icon {
+                animation: menu-item-icon 1s;
+                animation-fill-mode: forwards;
+              }
+            }
+            .icon {
+              width: 14px;
+              margin-right: 5px;
+            }
           }
         }
       }
-    }
-    .search-other-other {
-      display: none;
+      .operate-other {
+        display: none;
+      }
     }
   }
   .main-content {
@@ -377,18 +480,11 @@ export default {
       .search {
         width: 48.75%;
       }
-      .search-other {
-        display: none;
-      }
-      .search-other-other {
-        display: flex;
-        .menu {
-          display: flex;
-          flex-direction: row;
+      .header-main {
+        .user {
+          right: 0;
         }
-        .meun-item {
-          cursor: pointer;
-          background: rgba(255, 0, 76, 0.911);
+        .login {
           border: 1px solid rgba(255, 251, 0, 0.801);
           color: #fff;
           width: 100px;
@@ -397,13 +493,40 @@ export default {
           align-items: center;
           justify-content: center;
           border-radius: 10px;
-          margin-left: 15px;
-          &:hover {
-            .icon {
-              animation: menu-item-icon 1s;
-              animation-fill-mode: forwards;
+          margin-right: 0;
+          font-size: 16px;
+        }
+        .operate {
+          display: none;
+        }
+        .operate-other {
+          display: flex;
+          .menu {
+            display: flex;
+            flex-direction: row;
+          }
+          .meun-item {
+            cursor: pointer;
+            background: rgba(255, 0, 76, 0.911);
+            border: 1px solid rgba(255, 251, 0, 0.801);
+            color: #fff;
+            width: 100px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            margin-right: 15px;
+            &:hover {
+              .icon {
+                animation: menu-item-icon 1s;
+                animation-fill-mode: forwards;
+              }
             }
           }
+        }
+        .operate-other-token {
+          margin-right: 37px;
         }
       }
     }

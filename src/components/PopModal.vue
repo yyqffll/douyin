@@ -1,17 +1,16 @@
 <template>
-  <div class="PopModal" v-show="value">
+  <div class="PopModal" v-show="visible" :style="{'background': background, 'top': top}">
     <div class="modal" :style="{'width': width + 'px'}">
       <div class="header">
         <div class="title">{{title}}</div>
         <SvgIcon url="#icon-shanchu" @click="close"></SvgIcon>
       </div>
       <div class="content">
-        <slot name="content"></slot>
+        <slot name="content">{{msg}}</slot>
       </div>
       <div class="footer" v-show="!footerHide">
         <slot name="footer">
-          <button>确定</button>
-          <button>取消</button>
+          <button @click="confirm">确定</button>
         </slot>
       </div>
     </div>
@@ -31,10 +30,27 @@ export default {
     width: {
       default: '750',
     },
+    background: {
+      default: 'rgba(0, 0, 0, 0.85)'
+    },
+    top: {
+      default: 0
+    },
+    msg: {
+      default: ''
+    },
     footerHide: {
       default: false,
       typeof: Boolean
     },
+    onOk: {
+      default: null,
+      typeof: Function
+    },
+    onCancel: {
+      default: null,
+      typeof: Function
+    }
   },
   data () {
     return {
@@ -51,7 +67,14 @@ export default {
       this.visible = false
       this.$emit('input', false)
       this.$emit('on-cancel')
-    }
+      this.onCancel && this.onCancel()
+    },
+    confirm () {
+      this.visible = false
+      this.$emit('input', false)
+      this.$emit('on-ok')
+      this.onOk && this.onOk()
+    },
   },
   watch: {
     value (val) {
@@ -69,7 +92,6 @@ export default {
   position: fixed;
   top: 0;
   z-index: 999999;
-  background: rgba(0, 0, 0, 0.85);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -92,24 +114,27 @@ export default {
       background: #252632;
       display: flex;
       justify-content: center;
+      align-items: center;
       padding: 20px;
       position: relative;
     }
-    // .footer {
-    //   height: 58px;
-    //   display: flex;
-    //   justify-content: center;
-    //   align-items: center;
-    //   button {
-    //     width: 58px;
-    //     height: 38px;
-    //     margin: 0 10px;
-    //     border: none;
-    //     border-radius: 15px;
-    //     background: #252632;
-    //     color: #fff;
-    //   }
-    // }
+    .footer {
+      height: 58px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      button {
+        cursor: pointer;
+        width: 70px;
+        height: 40px;
+        font-size: 16px;
+        margin: 0 10px;
+        border: none;
+        border-radius: 15px;
+        background: #252632;
+        color: #afafaf;
+      }
+    }
   }
 }
 </style>

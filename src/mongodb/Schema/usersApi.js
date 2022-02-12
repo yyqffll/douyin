@@ -2,6 +2,23 @@ const express = require('express')
 const router = express.Router()
 
 const User = require('./users')
+router.post('/user/findOne', (req, res) => {
+  User.findOne(req.body).then(data => {
+    if (data) {
+      res.json({
+        success: true,
+        msg: '获取成功!',
+        data
+      })
+    } else {
+      res.json({
+        success: false,
+        msg: '未知错误,请联系管理员!',
+        data
+      })
+    }
+  })
+})
 router.post('/user/login', (req, res) => {
   User.findOne(req.body).then(data => {
     if (data) {

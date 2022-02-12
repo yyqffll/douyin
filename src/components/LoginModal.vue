@@ -1,7 +1,7 @@
 <template>
   <PopModal class="logon-modal" :title="title" :footerHide="true" v-model="show" @on-cancel="handleCancel">
     <template slot="content">
-      <div class="user-login">
+      <form @keyup.enter="confrimLogin" class="user-login">
         <p style="font-size: 20px; margin-bottom: 20px; color: #fff;">{{type === 'login' ? '用户名登录' : '用户注册'}}</p>
         <div class="input">
           <input type="text" placeholder="请输入用户名" v-model.trim="params.userName" />
@@ -41,9 +41,9 @@
         </p>
         <div class="login-btn" @click="confrimLogin">
           {{type === 'login' ? '登录' : '注册'}}
-          <SvgIcon url="#icon-loading" v-if="handled"></SvgIcon>
+          <SvgIcon url="#icon-loading" v-if="handleLoading"></SvgIcon>
         </div>
-      </div>
+      </form>
       <div class="success" v-show="success">
         <SvgIcon url="#icon-chenggong"></SvgIcon>
         <p>注册成功!</p>
@@ -57,6 +57,8 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
+
 import { drawAuthCode } from '@/libs/YzmCode'
 
 export default {
@@ -72,7 +74,7 @@ export default {
       title: '登录后抖音更懂你，内容推荐更精彩',
       type: 'login',
       show: this.value,
-      handled: false,
+      handleLoading: false,
       success: false,
       timer: null,
       time: 5,
@@ -92,9 +94,8 @@ export default {
       }
     }
   },
-  mounted () {
-  },
   methods: {
+    ...mapActions(['login']),
     getYzm () {
       this.yzm = drawAuthCode('yzm')
     },
@@ -141,8 +142,18 @@ export default {
       } else {
         this.yzmFlag = false
       }
-      if (this.handled) {
+      if (this.handleLoading) {
         return
+      }
+      if (this.type === 'login') {
+        this.handleLoading = true
+        this.login({ userName: this.params.userName, userPwd: this.params.userPwd }).then(res => {
+          this.handleLoading = false
+          this.handleCancel()
+          this.$openNoticeModal({ msg: res.msg })
+        }).catch(res => {
+          this.handleLoading = false
+        })
       }
       if (this.type === 'sign') {
         if (!this.params.passwordC) this.passwordC = true
@@ -153,22 +164,12 @@ export default {
         } else {
           this.passwordCS = false
         }
-      }
-      this.handled = true
-      this.$axios.post(
-        `/api/user/${this.type}`,
-        { userName: this.params.userName, userPwd: this.params.userPwd }
-      ).then(res => {
-        this.handled = false
-        if (this.type === 'login') {
-          this.handleCancel()
-        }
-        if (this.type === 'sign') {
+        this.$axios.post('/api/user/sign').then(res => {
           this.registerSuccess()
-        }
-      }).catch(res => {
-        this.handled = false
-      })
+        }).catch(res => {
+          this.handleLoading = false
+        })
+      }
     },
     gotoLogin () {
       clearInterval(this.timer)

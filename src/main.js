@@ -5,6 +5,8 @@ import store from './store'
 
 import axios from '@/libs/axios'
 
+import modal from '@/libs/modal'
+
 import './global.less'
 
 import VueAwesomeSwiper from 'vue-awesome-swiper'
@@ -15,6 +17,7 @@ import PopModal from '_c/PopModal'
 import SvgIcon from '_c/SvgIcon'
 
 Vue.prototype.$axios = axios
+Vue.use(modal)
 Vue.use(VueAwesomeSwiper)
 
 Vue.component('PopModal', PopModal)
