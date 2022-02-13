@@ -47,8 +47,8 @@ export default new Vuex.Store({
           userPwd,
         }).then(res => {
           commit('setToken', 'logined')
-          commit('setId', res.data._id)
-          commit('setUserId', res.data._id)
+          commit('setId', res.data.userId)
+          commit('setUserId', res.data.userId)
           commit('setUserName', res.data.userName)
           commit('setUserImg', res.data.userImg)
           resolve(res)
@@ -67,9 +67,9 @@ export default new Vuex.Store({
     getUserInfo ({ state, commit }) {
       return new Promise((resolve, reject) => {
         axios.post('/api/user/findOne', {
-          _id: getId()
+          userId: getId()
         }).then(res => {
-          commit('setUserId', res.data._id)
+          commit('setUserId', res.data.userId)
           commit('setUserName', res.data.userName)
           commit('setUserImg', res.data.userImg)
           resolve(res)
@@ -81,7 +81,7 @@ export default new Vuex.Store({
     uploadImg ({ state, commit }, { userImg }) {
       return new Promise((resolve, reject) => {
         axios.post('/api/user/uploadImg', {
-          _id: getId(),
+          userId: getId(),
           userImg
         }).then(res => {
           commit('setUserImg', res.data.userImg)

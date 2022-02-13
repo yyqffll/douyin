@@ -1,7 +1,7 @@
 const mongoose = require('../index')
 const Schema = mongoose.Schema
 const UsersSchema = new Schema({
-  _id: { type: String },
+  userId: { type: String },
   userName: { type: String },
   userPwd: { type: String },
   userImg: { type: String }

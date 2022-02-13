@@ -55,16 +55,20 @@ router.post('/user/sign', (req, res) => {
   })
 })
 router.post('/user/uploadImg', (req, res) => {
-  User.findByIdAndUpdate(
-    { _id: req.body._id },
+  User.updateOne(
+    { userId: req.body.userId },
     { userImg: req.body.userImg },
     { new: true }
   ).then(data => {
-    if (data) {
-      res.json({
-        success: true,
-        msg: '更换头像成功!',
-        data
+    if (data.matchedCount > 0) {
+      User.findOne({
+        userId: req.body.userId
+      }).then(data => {
+        res.json({
+          success: true,
+          msg: '更换头像成功!',
+          data
+        })
       })
     } else {
       res.json({

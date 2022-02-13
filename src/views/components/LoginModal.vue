@@ -167,7 +167,7 @@ export default {
         } else {
           this.passwordCS = false
         }
-        this.$axios.post('/api/user/sign', { ...param, _id: this.$v4() }).then(res => {
+        this.$axios.post('/api/user/sign', { ...param, userId: this.$v4() }).then(res => {
           this.registerSuccess()
         }).catch(res => {
           this.handleLoading = false
