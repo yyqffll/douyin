@@ -54,5 +54,26 @@ router.post('/user/sign', (req, res) => {
     }
   })
 })
+router.post('/user/uploadImg', (req, res) => {
+  User.findByIdAndUpdate(
+    { _id: req.body._id },
+    { userImg: req.body.userImg },
+    { new: true }
+  ).then(data => {
+    if (data) {
+      res.json({
+        success: true,
+        msg: '更换头像成功!',
+        data
+      })
+    } else {
+      res.json({
+        success: false,
+        msg: '未知错误,请联系管理员!',
+        data
+      })
+    }
+  })
+})
 
 module.exports = router

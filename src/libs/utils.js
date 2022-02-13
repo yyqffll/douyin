@@ -1,9 +1,12 @@
 import Cookies from 'js-cookie'
+import CryptoJS from 'crypto-js'
 import config from '@/config'
 
 const { cookieExpires } = config
 
 export const TOKEN_KEY = 'token'
+
+export const ID_KEY = 'id'
 
 export const setToken = token => {
   Cookies.set(TOKEN_KEY, token, {
@@ -15,6 +18,44 @@ export const getToken = () => {
   const token = Cookies.get(TOKEN_KEY)
   if (token) return token
   else return false
+}
+
+export const setId = id => {
+  Cookies.set(ID_KEY, id, {
+    expires: cookieExpires || 1
+  })
+}
+
+export const getId = () => {
+  const id = Cookies.get(ID_KEY)
+  if (id) return id
+  else return false
+}
+
+export const encrypt = (word) => {
+  if (word instanceof Object) {
+    word = JSON.stringify(word)
+  }
+  const key = CryptoJS.enc.Utf8.parse(config.key)
+  const encryptedObj = CryptoJS.AES.encrypt(CryptoJS.enc.Utf8.parse(word), key,
+    {
+      mode: CryptoJS.mode.ECB,
+      padding: CryptoJS.pad.Pkcs7,
+    },
+  )
+  return encryptedObj.toString()
+}
+
+export const decrypt = (word) => {
+  const key = CryptoJS.enc.Utf8.parse(config.key)
+  const decrypt = CryptoJS.AES.decrypt(word, key,
+    {
+      mode: CryptoJS.mode.ECB,
+      padding: CryptoJS.pad.ZeroPadding,
+    },
+  )
+  const decString = CryptoJS.enc.Utf8.stringify(decrypt).toString()
+  return decString
 }
 
 // 除
@@ -30,4 +71,8 @@ export function mod (a, b) {
   }
   decimal = al > bl ? al : bl
   return (a * decimal) / (b * decimal)
+}
+
+export function convert (num) {
+  return num / (1024 * 1024)
 }

@@ -61,6 +61,8 @@ import { mapActions } from 'vuex'
 
 import { drawAuthCode } from '@/libs/YzmCode'
 
+import { encrypt } from '@/libs/utils'
+
 export default {
   name: 'loginModal',
   props: {
@@ -145,7 +147,7 @@ export default {
       if (this.handleLoading) {
         return
       }
-      const param = { userName: this.params.userName, userPwd: this.params.userPwd }
+      const param = { userName: this.params.userName, userPwd: encrypt(this.params.userPwd) }
       if (this.type === 'login') {
         this.handleLoading = true
         this.login(param).then(res => {
@@ -165,7 +167,7 @@ export default {
         } else {
           this.passwordCS = false
         }
-        this.$axios.post('/api/user/sign', param).then(res => {
+        this.$axios.post('/api/user/sign', { ...param, _id: this.$v4() }).then(res => {
           this.registerSuccess()
         }).catch(res => {
           this.handleLoading = false
@@ -238,7 +240,7 @@ export default {
           color: #fff;
           border-radius: 5px;
           &::-webkit-input-placeholder {
-            color: #afafaf;
+            color: #7a7778;
           }
         }
         .input {
@@ -256,6 +258,9 @@ export default {
           }
         }
         .login-btn {
+          display: flex;
+          justify-content: center;
+          align-items: center;
           width: 200px;
           height: 50px;
           margin-top: 20px;

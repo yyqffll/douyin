@@ -33,9 +33,10 @@ router.beforeEach((to, from, next) => {
   const token = getToken()
   if (token) {
     if (!store.state.userId) {
-      store.dispatch('getUserInfo')
+      store.dispatch('getUserInfo').then(res => {
+        next()
+      })
     }
-    next()
   } else {
     if (to.params.type === 'recommend') {
       next()

@@ -12,5 +12,10 @@ axios.interceptors.response.use((res) => {
   } else {
     return data
   }
+}, err => {
+  noticeModal({
+    msg: '未知错误,请联系管理员!'
+  })
+  return Promise.reject(err)
 })
 export default axios

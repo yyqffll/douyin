@@ -10,7 +10,10 @@
       </div>
       <div class="footer" v-show="!footerHide">
         <slot name="footer">
-          <button @click="confirm">确定</button>
+          <div @click="confirm">
+            确定
+            <SvgIcon url="#icon-loading" v-if="btnLoading"></SvgIcon>
+          </div>
         </slot>
       </div>
     </div>
@@ -25,6 +28,10 @@ export default {
     },
     value: {
       default: true,
+      typeof: Boolean
+    },
+    loading: {
+      default: false,
       typeof: Boolean
     },
     width: {
@@ -54,7 +61,8 @@ export default {
   },
   data () {
     return {
-      visible: this.value
+      visible: this.value,
+      btnLoading: false
     }
   },
   mounted () {
@@ -64,21 +72,35 @@ export default {
   },
   methods: {
     close () {
+      this.onCancel && this.onCancel()
       this.visible = false
       this.$emit('input', false)
       this.$emit('on-cancel')
-      this.onCancel && this.onCancel()
     },
     confirm () {
-      this.visible = false
-      this.$emit('input', false)
-      this.$emit('on-ok')
       this.onOk && this.onOk()
+      if (this.loading) {
+        this.btnLoading = true
+      } else {
+        this.visible = false
+        this.$emit('input', false)
+      }
+      this.$emit('on-ok')
     },
   },
   watch: {
     value (val) {
       this.visible = val
+    },
+    visible (val) {
+      if (!val) {
+        this.btnLoading = val
+      }
+    },
+    loading (val) {
+      if (!val) {
+        this.btnLoading = val
+      }
     }
   }
 }
@@ -86,7 +108,7 @@ export default {
 
 <style lang="less" scoped>
 .PopModal {
-  color: #afafaf;
+  color: #7a7778;
   width: 100%;
   height: 100%;
   position: fixed;
@@ -123,18 +145,30 @@ export default {
       display: flex;
       justify-content: center;
       align-items: center;
-      button {
+      div {
+        display: flex;
+        justify-content: center;
+        align-items: center;
         cursor: pointer;
         width: 70px;
         height: 40px;
         font-size: 16px;
-        margin: 0 10px;
-        border: none;
         border-radius: 15px;
         background: #252632;
-        color: #afafaf;
+        color: #7a7778;
+        svg {
+          animation: rotate 1s infinite;
+        }
       }
     }
+  }
+}
+@keyframes rotate {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
   }
 }
 </style>

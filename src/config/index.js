@@ -6,6 +6,10 @@ module.exports = {
    */
   cookieExpires: 1,
   /**
+   * @description 密钥
+   */
+  key: '20000113YANGYQ',
+  /**
    * @description api请求基础路径
    */
   baseUrl: process.env.NODE_ENV === 'development' ? devHosturl : proHosturl

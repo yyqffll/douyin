@@ -37,6 +37,7 @@
               class="meun-item"
               @mouseenter="itemMouseenter(item.title)"
               @mouseleave="itemMouseleave(item.title)"
+              @click="handleMenuItem(item.title)"
             >
               <SvgIcon :url="item.svg"></SvgIcon>
               <span>{{item.title}}</span>
@@ -44,7 +45,7 @@
           </div>
         </div>
         <div class="user" v-if="token">
-          <img :src="douyin" />
+          <img :src="userImg ? userImg : douyin" />
           <div class="user-detail">
             <div class="user-inf">
               <div v-for="item in userItem" :key="item.title">
@@ -55,7 +56,7 @@
             </div>
             <div class="user-operate">
               <span>个人主页</span>
-              <span>更换头像</span>
+              <span @click="handleChangeHead">更换头像</span>
               <span @click="handleLoginOut">退出登录</span>
             </div>
           </div>
@@ -70,6 +71,7 @@
               class="meun-item"
               @mouseenter="itemMouseenter(item.title)"
               @mouseleave="itemMouseleave(item.title)"
+              @click="handleMenuItem(item.title)"
             >
               <SvgIcon :url="item.svg"></SvgIcon>
               <span>{{item.title}}</span>
@@ -82,17 +84,23 @@
       <router-view />
     </div>
     <LoginModal v-model="loginModalShow"></LoginModal>
+    <UploadImg v-model="uploadImgShow"></UploadImg>
+    <UploadVideo v-model="uploadVideoShow"></UploadVideo>
   </div>
 </template>
 
 <script>
 import douyin from '@/assets/douyin.jpeg'
 import { mapState, mapActions } from 'vuex'
-import LoginModal from '_c/LoginModal'
+import LoginModal from '@/views/components/LoginModal'
+import UploadImg from '@/views/components/UploadImg'
+import UploadVideo from '@/views/components/UploadVideo'
 export default {
   name: 'MainLayout',
   components: {
-    LoginModal
+    LoginModal,
+    UploadImg,
+    UploadVideo
   },
   data () {
     return {
@@ -138,12 +146,15 @@ export default {
         }
       ],
 
-      loginModalShow: false
+      loginModalShow: false,
+      uploadImgShow: false,
+      uploadVideoShow: false,
     }
   },
   computed: {
     ...mapState({
       token: state => state.token,
+      userImg: state => state.userImg
     })
   },
   mounted () {
@@ -179,7 +190,7 @@ export default {
           btn: '清除全部'
         }
       ]
-      const list = window.localStorage.getItem('searchHistory').split(',')
+      const list = window.localStorage.getItem('searchHistory')?.split(',')
       list.forEach(item => {
         if (item) {
           this.searchHistory.push({
@@ -193,7 +204,7 @@ export default {
       if (btn) {
         window.localStorage.setItem('searchHistory', '')
       } else {
-        const list = window.localStorage.getItem('searchHistory').split(',')
+        const list = window.localStorage.getItem('searchHistory')?.split(',')
         list.splice(list.indexOf(title), 1)
         window.localStorage.setItem('searchHistory', Array.from(new Set(list)).toString())
       }
@@ -224,12 +235,28 @@ export default {
         }
       })
     },
+    handleMenuItem (title) {
+      if (!this.token) {
+        this.$openNoticeModal({ msg: '请先登录!' })
+        return
+      }
+      if (title === '发布视频') {
+        this.uploadVideoShow = true
+      }
+    },
 
     handleLogin () {
       this.loginModalShow = true
     },
     handleLoginOut () {
-      this.$openNoticeModal({ msg: '是否确认退出登录?' }, this.loginOut)
+      this.$openNoticeModal({ msg: '是否确认退出登录?' }, () => {
+        this.loginOut().then(res => {
+          window.location.href = '/'
+        })
+      })
+    },
+    handleChangeHead () {
+      this.uploadImgShow = true
     },
 
     handleOperate () { },
@@ -405,6 +432,7 @@ export default {
         color: #fff;
         margin-right: 37px;
         cursor: pointer;
+        z-index: 99999;
       }
       .operate {
         position: absolute;
