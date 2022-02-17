@@ -22,8 +22,11 @@
             <div class="video-upload">
               <video ref="uploadVideo" :src="videoUrl" width="100%" height="100%" style="object-fit: fill;"></video>
               <div class="video-play-btn" @click="videoPreview">
-                <SvgIcon url="#icon-bofang" fontSize="40" v-if="!played"></SvgIcon>
-                <SvgIcon url="#icon-zanting1" fontSize="40" v-else></SvgIcon>
+                <template v-if="!editLoaing">
+                  <SvgIcon url="#icon-bofang" fontSize="40" v-if="!played"></SvgIcon>
+                  <SvgIcon url="#icon-zanting1" fontSize="40" v-else></SvgIcon>
+                </template>
+                <SvgIcon url="#icon-loading" class="icon-loaing" fontSize="40" v-else></SvgIcon>
               </div>
             </div>
             <div class="progress-bar">
@@ -48,8 +51,13 @@
         </div>
         <div class="video-control">
           <div @click="videoReUpload">重新上传</div>
-          <div @click="videoEdit">剪辑</div>
-          <div @click="videoConfirmEdit">确认剪辑</div>
+          <div @click="videoEdit">
+            <span>{{editStatus ? '取消剪辑' : '剪辑'}}</span>
+          </div>
+          <div @click="videoConfirmEdit" class="video-confirm-edit-btn">
+            <span>{{editLoaing ? '剪辑中' : '确认剪辑'}}</span>
+            <SvgIcon url="#icon-loading" v-if="editLoaing"></SvgIcon>
+          </div>
           <div @click="videoReEdit">重新剪辑</div>
         </div>
       </div>
@@ -85,9 +93,11 @@ export default {
       uploadVideo: false,
       video: '', // 上传的视频文件
       videoName: '', // 服务端存储的文件名
-      videoType: '',
+      videoType: '', // 文件类型
       videoUrl: '',
       played: false,
+      editStatus: false,
+      editLoaing: false,
 
       uploadImg: false,
       editSTime: '00:00',
@@ -154,11 +164,7 @@ export default {
           this.videoType = res.data.mimetype.split('/')[1]
           this.videoUrl = URL.createObjectURL(file)
           this.$nextTick(() => {
-            const uploadVideo = this.$refs.uploadVideo
-            uploadVideo.oncanplay = () => {
-              this.params.duration = uploadVideo.duration
-              this.editETime = sTom(uploadVideo.duration)
-            }
+            this.resetEdit()
           })
         }).catch(() => {
           this.uploadVideo = false
@@ -171,7 +177,8 @@ export default {
       this.$axios({
         url: '/api/play/delete',
         data: {
-          name: this.videoName
+          videoName: this.videoName,
+          videoType: this.videoType,
         }
       }).then(res => {
         this.uploadVideo = false
@@ -189,27 +196,39 @@ export default {
         this.played = true
       }
     },
+
+    resetEdit () {
+      const uploadVideo = this.$refs.uploadVideo
+      uploadVideo.oncanplay = () => {
+        this.params.duration = uploadVideo.duration
+        this.editSTime = '00:00'
+        this.editETime = sTom(uploadVideo.duration)
+      }
+    },
     videoEdit () {
       if (!this.uploadVideo) {
         return
       }
+      this.editStatus = !this.editStatus
       const div = document.querySelector('.edit-bar')
-      const divBar = document.querySelector('.edit-bg')
-      const divS = document.querySelector('#huakuaiS')
-      const divE = document.querySelector('#huakuaiE')
-      div.style.display = 'flex'
-      divS.style.left = '0px'
-      divE.style.left = divBar.offsetWidth - divE.offsetWidth + 'px'
-      const uploadVideo = this.$refs.uploadVideo
-      uploadVideo.oncanplay = () => {
-        this.params.duration = uploadVideo.duration
-        this.editETime = sTom(uploadVideo.duration)
+
+      if (this.editStatus) {
+        const divBar = document.querySelector('.edit-bg')
+        const divS = document.querySelector('#huakuaiS')
+        const divE = document.querySelector('#huakuaiE')
+        div.style.display = 'flex'
+        divS.style.left = '0px'
+        divE.style.left = divBar.offsetWidth - divE.offsetWidth + 'px'
+        this.resetEdit()
+      } else {
+        div.style.display = 'none'
       }
     },
     async videoConfirmEdit () {
-      if (!this.uploadVideo) {
+      if (!this.uploadVideo || this.editLoaing) {
         return
       }
+      this.editLoaing = true
       this.$axios({
         url: '/api/play/cut',
         data: {
@@ -219,18 +238,23 @@ export default {
           endTime: '00:' + this.editETime
         }
       }).then(res => {
+        this.editLoaing = false
         const div = document.querySelector('.edit-bar')
         div.style.display = 'none'
         const arrayBuffer = Buffer.from(res.data.video.data, 'binary')
         const blob = new Blob([arrayBuffer])
         this.videoUrl = URL.createObjectURL(blob)
+      }).catch(() => {
+        this.editLoaing = false
       })
     },
     videoReEdit () {
       if (!this.uploadVideo) {
         return
       }
-      this.params.video = this.video
+      const div = document.querySelector('.edit-bar')
+      div.style.display = 'none'
+      this.videoUrl = URL.createObjectURL(this.video)
     },
     hkDown (e, type) {
       const divBar = document.querySelector('.edit-bg')
@@ -365,6 +389,9 @@ export default {
               svg {
                 color: @color-black-2;
               }
+              .icon-loaing {
+                animation: rotate 1s infinite;
+              }
               &:hover {
                 cursor: pointer;
                 opacity: 1;
@@ -447,6 +474,14 @@ export default {
             color: @color-white;
           }
         }
+        .video-confirm-edit-btn {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          svg {
+            animation: rotate 1s infinite;
+          }
+        }
       }
     }
     .img {
@@ -482,6 +517,14 @@ export default {
         }
       }
     }
+  }
+}
+@keyframes rotate {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
   }
 }
 </style>

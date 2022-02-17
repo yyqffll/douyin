@@ -9,7 +9,7 @@ const port = 3000
 app.use(bodyParser.urlencoded({ extended: false }))
 
 app.use('/api', bodyParser.json({ limit: '10mb' }), userApi)
-app.use('/api', bodyParser.json({ limit: '10mb' }), playApi)
+app.use('/api', bodyParser.json({ limit: '50mb' }), playApi)
 
 app.listen(port, () => {
   console.log('server is ready on port 3000')
