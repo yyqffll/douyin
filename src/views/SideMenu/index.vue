@@ -111,7 +111,6 @@ export default {
     justify-content: center;
     align-items: center;
     height: 60px;
-    cursor: pointer;
     .icon {
       font-size: 41px;
     }
@@ -131,7 +130,7 @@ export default {
     }
     .menu-item {
       &:hover {
-        color: #fff;
+        color: @color-white;
       }
       display: flex;
       flex-direction: column;
@@ -146,7 +145,7 @@ export default {
       }
     }
     .menu-item-active {
-      color: #fff;
+      color: @color-white;
     }
   }
 }
@@ -157,7 +156,7 @@ export default {
       .title {
         display: inline-block;
         line-height: 1;
-        color: #fff;
+        color: @color-white;
         font-weight: 600;
         font-size: 25px;
       }

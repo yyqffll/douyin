@@ -8,7 +8,7 @@ import {
   setId
 } from '@/libs/utils'
 
-import axios from '@/libs/axios'
+import { request } from '@/libs/axios'
 
 Vue.use(Vuex)
 
@@ -42,9 +42,12 @@ export default new Vuex.Store({
   actions: {
     login ({ commit }, { userName, userPwd }) {
       return new Promise((resolve, reject) => {
-        axios.post('/api/user/login', {
-          userName,
-          userPwd,
+        request({
+          url: '/api/user/login',
+          data: {
+            userName,
+            userPwd,
+          }
         }).then(res => {
           commit('setToken', 'logined')
           commit('setId', res.data.userId)
@@ -66,8 +69,11 @@ export default new Vuex.Store({
     },
     getUserInfo ({ state, commit }) {
       return new Promise((resolve, reject) => {
-        axios.post('/api/user/findOne', {
-          userId: getId()
+        request({
+          url: '/api/user/findOne',
+          data: {
+            userId: getId()
+          }
         }).then(res => {
           commit('setUserId', res.data.userId)
           commit('setUserName', res.data.userName)
@@ -80,9 +86,12 @@ export default new Vuex.Store({
     },
     uploadImg ({ state, commit }, { userImg }) {
       return new Promise((resolve, reject) => {
-        axios.post('/api/user/uploadImg', {
-          userId: getId(),
-          userImg
+        request({
+          url: '/api/user/uploadImg',
+          data: {
+            userId: getId(),
+            userImg
+          }
         }).then(res => {
           commit('setUserImg', res.data.userImg)
           resolve(res)

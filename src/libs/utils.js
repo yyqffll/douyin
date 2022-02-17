@@ -76,3 +76,14 @@ export function mod (a, b) {
 export function convert (num) {
   return num / (1024 * 1024)
 }
+
+export function sTom (time) {
+  const t = Math.round(time)
+  if (t < 60) {
+    return `00:${t > 9 ? t : '0' + t}`
+  } else {
+    const m = Math.floor(t / 60)
+    const s = t % 60
+    return `${m > 9 ? m : '0' + m}:${s > 9 ? s : '0' + s}`
+  }
+}

@@ -1,5 +1,5 @@
 <template>
-  <svg class="icon" aria-hidden="true" v-bind="$attrs" v-on="$listeners">
+  <svg class="icon" aria-hidden="true" v-bind="$attrs" v-on="$listeners" :style="{ fontSize: fontSize + 'px' }">
     <use :xlink:href="url" />
   </svg>
 </template>
@@ -11,6 +11,9 @@ export default {
     url: {
       default: '',
       require: true
+    },
+    fontSize: {
+      default: ''
     }
   },
 }
@@ -18,8 +21,10 @@ export default {
 
 <style lang="less" scoped>
 .icon {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.15em;
+  fill: currentColor;
+  overflow: hidden;
 }
 </style>

@@ -2,7 +2,7 @@
   <PopModal class="logon-modal" :title="title" :footerHide="true" v-model="show" @on-cancel="handleCancel">
     <template slot="content">
       <form @keyup.enter="confrimLogin" class="user-login">
-        <p style="font-size: 20px; margin-bottom: 20px; color: #fff;">{{type === 'login' ? '用户名登录' : '用户注册'}}</p>
+        <p style="font-size: 20px; margin-bottom: 20px; color: @color-white;">{{type === 'login' ? '用户名登录' : '用户注册'}}</p>
         <div class="input">
           <input type="text" placeholder="请输入用户名" v-model.trim="params.userName" />
           <p v-show="usernameF">用户名不能为空</p>
@@ -27,17 +27,17 @@
         </div>
         <p style="font-size: 12px;">
           已阅读并同意
-          <span style="color: #fff; cursor: pointer;">服务协议</span>
+          <span style="color: @color-white; cursor: pointer;">服务协议</span>
           和
-          <span style="color: #fff; cursor: pointer;">隐私条款</span>
+          <span style="color: @color-white; cursor: pointer;">隐私条款</span>
         </p>
         <p style="font-size: 12px; margin-top: 5px;" v-if="type === 'login'">
           无账号？
-          <span style="color: #a9263f; cursor: pointer;" @click="handleRegister">立即注册</span>
+          <span style="color: @color-red; cursor: pointer;" @click="handleRegister">立即注册</span>
         </p>
         <p style="font-size: 12px; margin-top: 5px;" v-if="type === 'sign'">
           已有账号？
-          <span style="color: #a9263f; cursor: pointer;" @click="handleLogin">立即登录</span>
+          <span style="color: @color-red; cursor: pointer;" @click="handleLogin">立即登录</span>
         </p>
         <div class="login-btn" @click="confrimLogin">
           {{type === 'login' ? '登录' : '注册'}}
@@ -167,7 +167,13 @@ export default {
         } else {
           this.passwordCS = false
         }
-        this.$axios.post('/api/user/sign', { ...param, userId: this.$v4() }).then(res => {
+        this.$axios({
+          url: '/api/user/sign',
+          data: {
+            ...param,
+            userId: this.$v4()
+          }
+        }).then(res => {
           this.registerSuccess()
         }).catch(res => {
           this.handleLoading = false
@@ -234,13 +240,13 @@ export default {
         input {
           width: 200px;
           height: 50px;
-          background: #2e2e3b;
+          background: @color-modal-1;
           border: none;
           padding: 0 10px;
-          color: #fff;
+          color: @color-white;
           border-radius: 5px;
           &::-webkit-input-placeholder {
-            color: #7a7778;
+            color: @color-font-basic;
           }
         }
         .input {
@@ -248,7 +254,7 @@ export default {
           margin-bottom: 20px;
           p {
             font-size: 12px;
-            color: #a9263f;
+            color: @color-red;
             position: absolute;
           }
           canvas {
@@ -264,11 +270,14 @@ export default {
           width: 200px;
           height: 50px;
           margin-top: 20px;
-          background: #a9263f;
+          background: @color-red;
           border-radius: 5px;
           text-align: center;
           line-height: 50px;
           cursor: pointer;
+          &:hover {
+            color: @color-white;
+          }
           svg {
             animation: rotate 1s infinite;
           }
@@ -276,7 +285,7 @@ export default {
       }
       .success {
         position: absolute;
-        background: #252632;
+        background: @color-modal-2;
         width: 100%;
         height: 100%;
         display: flex;
@@ -291,7 +300,7 @@ export default {
           margin-bottom: 5px;
           span {
             cursor: pointer;
-            color: #6bc839;
+            color: @color-green;
           }
         }
       }

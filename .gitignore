@@ -1,8 +1,7 @@
 .DS_Store
 node_modules
 /dist
-src/assets/1.mp4
-src/assets/1.png
+/dyvideo
 
 
 # local env files

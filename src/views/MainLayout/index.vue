@@ -29,6 +29,22 @@
         </div>
       </div>
       <div class="header-main">
+        <div class="operate">
+          <SvgIcon class="menu-icon" url="#icon-caidan"></SvgIcon>
+          <div class="menu">
+            <div
+              v-for="item in menuItem"
+              :key="item.title"
+              class="meun-item"
+              @mouseenter="itemMouseenter(item.title)"
+              @mouseleave="itemMouseleave(item.title)"
+              @click="handleMenuItem(item.title)"
+            >
+              <SvgIcon :url="item.svg"></SvgIcon>
+              <span>{{item.title}}</span>
+            </div>
+          </div>
+        </div>
         <div class="operate-other" :class="{'operate-other-token': token}">
           <div class="menu">
             <div
@@ -50,7 +66,7 @@
             <div class="user-inf">
               <div v-for="item in userItem" :key="item.title">
                 <SvgIcon :url="item.url"></SvgIcon>
-                <p style="font-weight: 600; color: #fff;">{{item.total}}</p>
+                <p style="font-weight: 600; color: @color-white;">{{item.total}}</p>
                 <p style="font-size: 12px;">{{item.title}}</p>
               </div>
             </div>
@@ -62,22 +78,6 @@
           </div>
         </div>
         <div class="login" @click="handleLogin" v-else>登录</div>
-        <div class="operate">
-          <SvgIcon class="menu-icon" url="#icon-caidan"></SvgIcon>
-          <div class="menu">
-            <div
-              v-for="item in menuItem"
-              :key="item.title"
-              class="meun-item"
-              @mouseenter="itemMouseenter(item.title)"
-              @mouseleave="itemMouseleave(item.title)"
-              @click="handleMenuItem(item.title)"
-            >
-              <SvgIcon :url="item.svg"></SvgIcon>
-              <span>{{item.title}}</span>
-            </div>
-          </div>
-        </div>
       </div>
     </header>
     <div class="main-content">
@@ -269,6 +269,7 @@ export default {
   min-width: 300px;
   height: 100%;
   flex: 1;
+  background: @color-modal-1;
   .header {
     display: flex;
     align-items: center;
@@ -282,7 +283,7 @@ export default {
       align-items: center;
       width: 68.75%;
       height: 40px;
-      background: #292b35;
+      background: @color-black-4;
       border-radius: 4px;
       .icon {
         margin-left: 10px;
@@ -296,7 +297,7 @@ export default {
           line-height: 22px;
           padding: 0 4px;
           border: none;
-          background: #292b35;
+          background: @color-black-4;
           font-weight: 400;
           font-size: 14px;
           outline: none;
@@ -308,16 +309,16 @@ export default {
         border: none;
         cursor: pointer;
         font-size: 16px;
-        background: #292b35;
-        color: #fff;
+        background: @color-black-4;
+        color: @color-white;
       }
       .search-history {
         position: absolute;
         top: 50px;
-        z-index: 9999;
+        z-index: 99999;
         width: 100%;
-        background: #292b35;
-        color: #fff;
+        background: @color-black-4;
+        color: @color-white;
         padding: 10px 0;
         & > .search-history-item:first-child {
           .btn:hover {
@@ -342,7 +343,7 @@ export default {
           }
           .icon {
             visibility: hidden;
-            color: #fff;
+            color: @color-white;
             &:hover {
               color: rgba(255, 0, 76, 0.911);
             }
@@ -361,11 +362,12 @@ export default {
         position: absolute;
         top: 0;
         right: 37px;
-        z-index: 9999;
+        z-index: 99999;
         display: flex;
         flex-direction: column;
         align-items: flex-end;
         &:hover {
+          z-index: 9999;
           .user-detail {
             display: flex;
           }
@@ -374,13 +376,13 @@ export default {
           width: 32px;
           height: 32px;
           border-radius: 50%;
-          border: 1px solid #292b35;
+          border: 1px solid @color-black-4;
           margin-bottom: 10px;
           box-sizing: border-box;
         }
         .user-detail {
           display: none;
-          background: #292b35;
+          background: @color-black-4;
           flex-direction: column;
           border-radius: 5px;
           .user-inf {
@@ -395,7 +397,7 @@ export default {
               align-items: center;
               &:hover {
                 p {
-                  color: #fff;
+                  color: @color-white;
                 }
               }
               .icon {
@@ -415,7 +417,7 @@ export default {
               cursor: pointer;
               font-size: 14px;
               &:hover {
-                color: #fff;
+                color: @color-white;
               }
             }
           }
@@ -429,20 +431,20 @@ export default {
         text-align: center;
         line-height: 32px;
         background: rgba(255, 0, 76, 0.911);
-        color: #fff;
+        color: @color-white;
         margin-right: 37px;
         cursor: pointer;
         z-index: 99999;
       }
       .operate {
         position: absolute;
-        z-index: 9999;
+        z-index: 99999;
         top: 0;
         display: flex;
         flex-direction: column;
         align-items: flex-end;
         &:hover {
-          z-index: 9998;
+          z-index: 9999;
           .menu {
             display: flex;
           }
@@ -460,12 +462,12 @@ export default {
         .menu {
           width: 100px;
           overflow: hidden;
-          background: #292b35;
+          background: @color-black-4;
           padding: 10px 20px 0px;
           display: none;
           align-items: center;
           flex-direction: column;
-          color: #fff;
+          color: @color-white;
           .meun-item {
             display: flex;
             justify-content: center;
@@ -475,7 +477,7 @@ export default {
             height: 32px;
             margin-bottom: 10px;
             background: #000000;
-            border: 2px solid #fff;
+            border: 2px solid @color-white;
             border-radius: 5px;
             cursor: pointer;
             &:hover {
@@ -514,7 +516,7 @@ export default {
         }
         .login {
           border: 1px solid rgba(255, 251, 0, 0.801);
-          color: #fff;
+          color: @color-white;
           width: 100px;
           height: 40px;
           display: flex;
@@ -529,15 +531,16 @@ export default {
         }
         .operate-other {
           display: flex;
+          z-index: 99999;
           .menu {
             display: flex;
             flex-direction: row;
           }
           .meun-item {
             cursor: pointer;
-            background: rgba(255, 0, 76, 0.911);
-            border: 1px solid rgba(255, 251, 0, 0.801);
-            color: #fff;
+            background: rgba(255, 0, 76, 0.9);
+            border: 1px solid rgba(255, 251, 0, 0.8);
+            color: @color-white;
             width: 100px;
             height: 40px;
             display: flex;

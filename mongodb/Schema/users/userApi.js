@@ -1,7 +1,6 @@
 const express = require('express')
 const router = express.Router()
-
-const User = require('./users')
+const User = require('./user')
 router.post('/user/findOne', (req, res) => {
   User.findOne(req.body).then(data => {
     if (data) {

@@ -1,5 +1,5 @@
 <template>
-  <div class="PopModal" v-show="visible" :style="{'background': background, 'top': top}">
+  <div class="pop-modal" v-show="visible" :style="{'background': background, 'top': top}">
     <div class="modal" :style="{'width': width + 'px'}">
       <div class="header">
         <div class="title">{{title}}</div>
@@ -22,6 +22,7 @@
 
 <script>
 export default {
+  name: 'PopModal',
   props: {
     title: {
       default: '弹窗'
@@ -38,7 +39,7 @@ export default {
       default: '750',
     },
     background: {
-      default: 'rgba(0, 0, 0, 0.85)'
+      default: 'rgba(0, 0, 0, 0.8)'
     },
     top: {
       default: 0
@@ -66,7 +67,7 @@ export default {
     }
   },
   mounted () {
-    const PopModal = document.querySelector('.PopModal')
+    const PopModal = document.querySelector('.pop-modal')
     PopModal.parentNode.removeChild(PopModal)
     document.body.appendChild(PopModal)
   },
@@ -107,8 +108,8 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.PopModal {
-  color: #7a7778;
+.pop-modal {
+  color: @color-font-basic;
   width: 100%;
   height: 100%;
   position: fixed;
@@ -118,7 +119,7 @@ export default {
   justify-content: center;
   align-items: center;
   .modal {
-    background: #181a25;
+    background: @color-modal-1;
     .header {
       position: relative;
       height: 58px;
@@ -133,7 +134,7 @@ export default {
     }
     .content {
       min-height: 100px;
-      background: #252632;
+      background: @color-modal-2;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -150,12 +151,15 @@ export default {
         justify-content: center;
         align-items: center;
         cursor: pointer;
-        width: 70px;
+        width: 80px;
         height: 40px;
         font-size: 16px;
         border-radius: 15px;
-        background: #252632;
-        color: #7a7778;
+        background: @color-modal-2;
+        color: @color-font-basic;
+        &:hover {
+          color: @color-white;
+        }
         svg {
           animation: rotate 1s infinite;
         }

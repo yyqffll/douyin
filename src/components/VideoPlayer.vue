@@ -147,7 +147,7 @@ export default {
       position: absolute;
       width: 100%;
       height: 2px;
-      background: #7a7778;
+      background: @color-font-basic;
       .time-played {
         height: 2px;
         background: white;

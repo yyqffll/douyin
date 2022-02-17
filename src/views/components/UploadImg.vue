@@ -128,7 +128,7 @@ export default {
         top: -7px;
         right: -7px;
         cursor: pointer;
-        background: #252632;
+        background: @color-modal-2;
         border-radius: 50%;
       }
     }

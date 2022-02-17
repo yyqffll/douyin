@@ -5,7 +5,7 @@ import store from './store'
 
 import './global.less'
 
-import axios from '@/libs/axios'
+import { request } from '@/libs/axios'
 
 import { v4 } from 'uuid'
 
@@ -20,7 +20,7 @@ import PopModal from '_c/PopModal'
 
 import SvgIcon from '_c/SvgIcon'
 
-Vue.prototype.$axios = axios
+Vue.prototype.$axios = request
 Vue.prototype.$v4 = v4
 Vue.use(modal)
 Vue.use(VueCropper)
