@@ -2,7 +2,7 @@
   <PopModal class="logon-modal" :title="title" :footerHide="true" v-model="show" @on-cancel="handleCancel">
     <template slot="content">
       <form @keyup.enter="confrimLogin" class="user-login">
-        <p style="font-size: 20px; margin-bottom: 20px; color: @color-white;">{{type === 'login' ? '用户名登录' : '用户注册'}}</p>
+        <p>{{type === 'login' ? '用户名登录' : '用户注册'}}</p>
         <div class="input">
           <input type="text" placeholder="请输入用户名" v-model.trim="params.userName" />
           <p v-show="usernameF">用户名不能为空</p>
@@ -27,17 +27,17 @@
         </div>
         <p style="font-size: 12px;">
           已阅读并同意
-          <span style="color: @color-white; cursor: pointer;">服务协议</span>
+          <span class="key-point">服务协议</span>
           和
-          <span style="color: @color-white; cursor: pointer;">隐私条款</span>
+          <span class="key-point">隐私条款</span>
         </p>
         <p style="font-size: 12px; margin-top: 5px;" v-if="type === 'login'">
           无账号？
-          <span style="color: @color-red; cursor: pointer;" @click="handleRegister">立即注册</span>
+          <span class="key-point" @click="handleRegister">立即注册</span>
         </p>
         <p style="font-size: 12px; margin-top: 5px;" v-if="type === 'sign'">
           已有账号？
-          <span style="color: @color-red; cursor: pointer;" @click="handleLogin">立即登录</span>
+          <span class="key-point" @click="handleLogin">立即登录</span>
         </p>
         <div class="login-btn" @click="confrimLogin">
           {{type === 'login' ? '登录' : '注册'}}
@@ -234,16 +234,27 @@ export default {
   .modal {
     .content {
       .user-login {
+        & > p:first-child {
+          font-size: 20px;
+          margin-bottom: 20px;
+          color: @color-white-1;
+        }
+        p {
+          .key-point {
+            color: @color-white-1;
+            cursor: pointer;
+          }
+        }
         display: flex;
         flex-direction: column;
         align-items: center;
         input {
           width: 200px;
           height: 50px;
-          background: @color-modal-1;
+          background: @color-black-2-2;
           border: none;
           padding: 0 10px;
-          color: @color-white;
+          color: @color-white-1;
           border-radius: 5px;
           &::-webkit-input-placeholder {
             color: @color-font-basic;
@@ -254,7 +265,7 @@ export default {
           margin-bottom: 20px;
           p {
             font-size: 12px;
-            color: @color-red;
+            color: @color-red-1;
             position: absolute;
           }
           canvas {
@@ -270,13 +281,14 @@ export default {
           width: 200px;
           height: 50px;
           margin-top: 20px;
-          background: @color-red;
+          background: @color-red-2;
           border-radius: 5px;
           text-align: center;
           line-height: 50px;
           cursor: pointer;
+          font-weight: 600;
           &:hover {
-            color: @color-white;
+            color: @color-white-1;
           }
           svg {
             animation: rotate 1s infinite;
@@ -285,7 +297,7 @@ export default {
       }
       .success {
         position: absolute;
-        background: @color-modal-2;
+        background: @color-black-3;
         width: 100%;
         height: 100%;
         display: flex;

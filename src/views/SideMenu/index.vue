@@ -21,7 +21,6 @@
 </template>
 
 <script>
-// import trigger from '@/assets/trigger.svg'
 export default {
   name: 'SideMenu',
   data () {
@@ -81,10 +80,6 @@ export default {
           title: '音乐',
           svg: '#icon-yinyue'
         },
-        // {
-        //   title: '虎年',
-        //   svg: trigger
-        // },
       ],
       menuItemActive: '推荐'
     }
@@ -125,12 +120,14 @@ export default {
     flex-direction: column;
     padding-bottom: 60px;
     overflow-y: scroll;
+    font-weight: 400;
     &::-webkit-scrollbar {
       display: none;
     }
     .menu-item {
       &:hover {
-        color: @color-white;
+        color: @color-white-1;
+        font-weight: 600;
       }
       display: flex;
       flex-direction: column;
@@ -145,7 +142,8 @@ export default {
       }
     }
     .menu-item-active {
-      color: @color-white;
+      color: @color-white-1;
+      font-weight: 600;
     }
   }
 }
@@ -156,7 +154,7 @@ export default {
       .title {
         display: inline-block;
         line-height: 1;
-        color: @color-white;
+        color: @color-white-1;
         font-weight: 600;
         font-size: 25px;
       }
@@ -166,13 +164,13 @@ export default {
       .menu-item {
         display: flex;
         flex-direction: row;
-        justify-content: normal;
+        justify-content: center;
+        align-items: center;
         font-size: 16px;
-        transform: translateX(22%);
         margin: 10px 18px 5px;
         .icon {
           font-size: 19px;
-          margin: 6px 10px;
+          margin: 6px 10px 6px 0;
         }
         img {
           width: 64px;

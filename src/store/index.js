@@ -5,7 +5,8 @@ import {
   getToken,
   setToken,
   getId,
-  setId
+  setId,
+  bufferToUrl
 } from '@/libs/utils'
 
 import { request } from '@/libs/axios'
@@ -19,6 +20,7 @@ export default new Vuex.Store({
     userId: '',
     userName: '',
     userImg: '',
+    userImgUrl: '',
   },
   mutations: {
     setToken (state, token) {
@@ -38,6 +40,9 @@ export default new Vuex.Store({
     setUserImg (state, userImg) {
       state.userImg = userImg
     },
+    setUserImgUrl (state, userImgUrl) {
+      state.userImgUrl = userImgUrl
+    },
   },
   actions: {
     login ({ commit }, { userName, userPwd }) {
@@ -54,6 +59,14 @@ export default new Vuex.Store({
           commit('setUserId', res.data.userId)
           commit('setUserName', res.data.userName)
           commit('setUserImg', res.data.userImg)
+          request({
+            url: '/api/img/find',
+            data: {
+              imgName: res.data.userImg
+            }
+          }).then(res => {
+            commit('setUserImgUrl', bufferToUrl(res.data.img.data))
+          })
           resolve(res)
         }).catch(err => {
           reject(err)
@@ -64,7 +77,7 @@ export default new Vuex.Store({
       return new Promise((resolve, reject) => {
         commit('setToken', '')
         commit('setId', '')
-        resolve('loginOut')
+        resolve('退出登录成功!')
       })
     },
     getUserInfo ({ state, commit }) {
@@ -78,22 +91,38 @@ export default new Vuex.Store({
           commit('setUserId', res.data.userId)
           commit('setUserName', res.data.userName)
           commit('setUserImg', res.data.userImg)
+          request({
+            url: '/api/img/find',
+            data: {
+              imgName: res.data.userImg
+            }
+          }).then(res => {
+            commit('setUserImgUrl', bufferToUrl(res.data.img.data))
+          })
           resolve(res)
         }).catch(err => {
           reject(err)
         })
       })
     },
-    uploadImg ({ state, commit }, { userImg }) {
+    updateUserImg ({ state, commit }, { userImg }) {
       return new Promise((resolve, reject) => {
         request({
-          url: '/api/user/uploadImg',
+          url: '/api/user/updateImg',
           data: {
             userId: getId(),
             userImg
           }
         }).then(res => {
           commit('setUserImg', res.data.userImg)
+          request({
+            url: '/api/img/find',
+            data: {
+              imgName: res.data.userImg
+            }
+          }).then(res => {
+            commit('setUserImgUrl', bufferToUrl(res.data.img.data))
+          })
           resolve(res)
         }).catch(err => {
           reject(err)

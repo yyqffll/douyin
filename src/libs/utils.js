@@ -87,3 +87,9 @@ export function sTom (time) {
     return `${m > 9 ? m : '0' + m}:${s > 9 ? s : '0' + s}`
   }
 }
+
+export function bufferToUrl (data) {
+  const arrayBuffer = Buffer.from(data, 'binary')
+  const blob = new Blob([arrayBuffer])
+  return URL.createObjectURL(blob)
+}

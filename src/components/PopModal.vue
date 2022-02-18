@@ -38,9 +38,7 @@ export default {
     width: {
       default: '750',
     },
-    background: {
-      default: 'rgba(0, 0, 0, 0.8)'
-    },
+    background: {},
     top: {
       default: 0
     },
@@ -110,6 +108,7 @@ export default {
 <style lang="less" scoped>
 .pop-modal {
   color: @color-font-basic;
+  background: @color-black-1-1;
   width: 100%;
   height: 100%;
   position: fixed;
@@ -119,13 +118,14 @@ export default {
   justify-content: center;
   align-items: center;
   .modal {
-    background: @color-modal-1;
+    background: @color-black-2;
     .header {
       position: relative;
       height: 58px;
       display: flex;
       justify-content: center;
       align-items: center;
+      color: @color-white-2;
       svg {
         position: absolute;
         right: 20px;
@@ -134,7 +134,7 @@ export default {
     }
     .content {
       min-height: 100px;
-      background: @color-modal-2;
+      background: @color-black-3;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -155,10 +155,11 @@ export default {
         height: 40px;
         font-size: 16px;
         border-radius: 15px;
-        background: @color-modal-2;
+        background: @color-black-3;
         color: @color-font-basic;
+        font-weight: 600;
         &:hover {
-          color: @color-white;
+          color: @color-white-1;
         }
         svg {
           animation: rotate 1s infinite;

@@ -61,12 +61,12 @@
           </div>
         </div>
         <div class="user" v-if="token">
-          <img :src="userImg ? userImg : douyin" />
+          <img :src="userImgUrl" />
           <div class="user-detail">
             <div class="user-inf">
               <div v-for="item in userItem" :key="item.title">
                 <SvgIcon :url="item.url"></SvgIcon>
-                <p style="font-weight: 600; color: @color-white;">{{item.total}}</p>
+                <p style="font-weight: 600; color: @color-white-1;">{{item.total}}</p>
                 <p style="font-size: 12px;">{{item.title}}</p>
               </div>
             </div>
@@ -81,7 +81,7 @@
       </div>
     </header>
     <div class="main-content">
-      <router-view />
+      <!-- <router-view /> -->
     </div>
     <LoginModal v-model="loginModalShow"></LoginModal>
     <UploadImg v-model="uploadImgShow"></UploadImg>
@@ -90,7 +90,6 @@
 </template>
 
 <script>
-import douyin from '@/assets/douyin.jpeg'
 import { mapState, mapActions } from 'vuex'
 import LoginModal from '@/views/components/LoginModal'
 import UploadImg from '@/views/components/UploadImg'
@@ -112,8 +111,6 @@ export default {
       ],
       showHistory: false,
       searchValue: '',
-
-      douyin: douyin,
 
       userItem: [
         {
@@ -154,8 +151,9 @@ export default {
   computed: {
     ...mapState({
       token: state => state.token,
-      userImg: state => state.userImg
-    })
+      userImg: state => state.userImg,
+      userImgUrl: state => state.userImgUrl
+    }),
   },
   mounted () {
     document.addEventListener('click', this.checkClick)
@@ -249,9 +247,12 @@ export default {
       this.loginModalShow = true
     },
     handleLoginOut () {
-      this.$openNoticeModal({ msg: '是否确认退出登录?' }, () => {
+      this.$openNoticeModal({ msg: '是否确认退出登录?' }, null, () => {
         this.loginOut().then(res => {
           window.location.href = '/'
+          this.$openNoticeModal({
+            msg: res
+          })
         })
       })
     },
@@ -269,21 +270,22 @@ export default {
   min-width: 300px;
   height: 100%;
   flex: 1;
-  background: @color-modal-1;
+  background: @color-black-2;
   .header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     height: 60px;
     padding: 0 32px 0 22px;
+    border-bottom: 2px solid @color-black-3;
     .search {
       position: relative;
       display: flex;
       flex-direction: row;
       align-items: center;
-      width: 68.75%;
+      width: 45%;
       height: 40px;
-      background: @color-black-4;
+      background: @color-black-3;
       border-radius: 4px;
       .icon {
         margin-left: 10px;
@@ -297,11 +299,15 @@ export default {
           line-height: 22px;
           padding: 0 4px;
           border: none;
-          background: @color-black-4;
+          background: @color-black-3;
           font-weight: 400;
           font-size: 14px;
           outline: none;
-          caret-color: #fe2c55;
+          caret-color: @color-red-1;
+          color: @color-white-1;
+          &::-webkit-input-placeholder {
+            color: @color-font-basic;
+          }
         }
       }
       button {
@@ -309,25 +315,30 @@ export default {
         border: none;
         cursor: pointer;
         font-size: 16px;
-        background: @color-black-4;
-        color: @color-white;
+        background: @color-black-3;
+        color: @color-white-1;
+        font-weight: 600;
+        &:hover {
+          color: @color-red-1;
+        }
       }
       .search-history {
         position: absolute;
         top: 50px;
         z-index: 99999;
         width: 100%;
-        background: @color-black-4;
-        color: @color-white;
+        background: @color-black-3;
+        color: @color-white-1;
         padding: 10px 0;
         & > .search-history-item:first-child {
           .btn:hover {
-            color: rgba(255, 0, 76, 0.911);
+            color: @color-red-1;
           }
         }
         & > .search-history-item:not(:first-child) {
           cursor: pointer;
           &:hover {
+            background: @color-black-3;
             .icon {
               visibility: visible;
             }
@@ -343,9 +354,9 @@ export default {
           }
           .icon {
             visibility: hidden;
-            color: @color-white;
+            color: @color-white-1;
             &:hover {
-              color: rgba(255, 0, 76, 0.911);
+              color: @color-red-1;
             }
           }
         }
@@ -368,6 +379,7 @@ export default {
         align-items: flex-end;
         &:hover {
           z-index: 9999;
+          cursor: pointer;
           .user-detail {
             display: flex;
           }
@@ -376,18 +388,18 @@ export default {
           width: 32px;
           height: 32px;
           border-radius: 50%;
-          border: 1px solid @color-black-4;
-          margin-bottom: 10px;
+          border: 1px solid @color-black-3;
+          margin-bottom: 15px;
           box-sizing: border-box;
         }
         .user-detail {
           display: none;
-          background: @color-black-4;
+          background: @color-black-3;
           flex-direction: column;
           border-radius: 5px;
           .user-inf {
             display: flex;
-            border-bottom: 1px solid #000000;
+            border-bottom: 1px solid @color-black-2;
             div {
               cursor: pointer;
               padding: 25px 30px 10px;
@@ -397,7 +409,8 @@ export default {
               align-items: center;
               &:hover {
                 p {
-                  color: @color-white;
+                  color: @color-white-1;
+                  font-weight: 600;
                 }
               }
               .icon {
@@ -417,7 +430,8 @@ export default {
               cursor: pointer;
               font-size: 14px;
               &:hover {
-                color: @color-white;
+                color: @color-white-1;
+                font-weight: 600;
               }
             }
           }
@@ -430,8 +444,8 @@ export default {
         font-size: 12px;
         text-align: center;
         line-height: 32px;
-        background: rgba(255, 0, 76, 0.911);
-        color: @color-white;
+        background: @color-red-1;
+        color: @color-white-1;
         margin-right: 37px;
         cursor: pointer;
         z-index: 99999;
@@ -457,17 +471,17 @@ export default {
           height: 32px;
           border-radius: 50%;
           cursor: pointer;
-          margin-bottom: 10px;
+          margin-bottom: 15px;
         }
         .menu {
           width: 100px;
           overflow: hidden;
-          background: @color-black-4;
+          background: @color-black-3;
           padding: 10px 20px 0px;
           display: none;
           align-items: center;
           flex-direction: column;
-          color: @color-white;
+          color: @color-white-1;
           .meun-item {
             display: flex;
             justify-content: center;
@@ -476,8 +490,8 @@ export default {
             width: 100%;
             height: 32px;
             margin-bottom: 10px;
-            background: #000000;
-            border: 2px solid @color-white;
+            background: @color-black-1;
+            border: 2px solid @color-white-1;
             border-radius: 5px;
             cursor: pointer;
             &:hover {
@@ -516,7 +530,7 @@ export default {
         }
         .login {
           border: 1px solid rgba(255, 251, 0, 0.801);
-          color: @color-white;
+          color: @color-white-1;
           width: 100px;
           height: 40px;
           display: flex;
@@ -540,7 +554,7 @@ export default {
             cursor: pointer;
             background: rgba(255, 0, 76, 0.9);
             border: 1px solid rgba(255, 251, 0, 0.8);
-            color: @color-white;
+            color: @color-white-1;
             width: 100px;
             height: 40px;
             display: flex;

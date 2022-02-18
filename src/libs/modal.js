@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import PopModal from '_c/PopModal'
 
-export const noticeModal = function (props = {}, onOk = null, timeout = 5000) {
+export const noticeModal = function (props = {}, timeout = 5000, onOk = null) {
   let timer = null
   const Modal = Vue.extend(PopModal)
   const instance = new Modal({
@@ -22,7 +22,7 @@ export const noticeModal = function (props = {}, onOk = null, timeout = 5000) {
     }
   }).$mount()
   document.body.appendChild(instance.$el)
-  timer = setTimeout(() => {
+  timer = timeout && setTimeout(() => {
     document.body.removeChild(instance.$el)
   }, timeout)
 }

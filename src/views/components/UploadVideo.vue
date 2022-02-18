@@ -2,9 +2,9 @@
   <PopModal
     id="uploadVideoModal"
     v-model="show"
-    title="上传视频"
+    title="发布视频"
     class="video-modal"
-    width="1280"
+    width="1200"
     :loading="loading"
     @on-ok="confrimUpload"
     @on-cancel="cancelUpload"
@@ -62,23 +62,34 @@
         </div>
       </div>
       <div class="img">
-        <input ref="input" type="file" accept="image/*" @change="onUploadImg" />
-        <div class="upload" v-show="!uploadImg"></div>
-        <div class="upload-img" v-show="uploadImg">
-          <span class="delete" @click="deleteImg" title="删除">
-            <SvgIcon url="#icon-xiaoshanchu"></SvgIcon>
-          </span>
-          <img :src="params.img" width="100%" height="100%" />
+        <div class="img-container">
+          <p class="title">设置封面</p>
+          <div class="img-container-control">
+            <img :src="imgUrl" width="100" height="100" />
+            <div></div>
+            <div class="img-container-control-msg">
+              <div>默认获取视频第一帧</div>
+              <div>
+                <SvgIcon url="#icon-xiugai"></SvgIcon>
+                <span>编辑封面</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+      <ImageUpload v-model="imgName" :img.sync="img" v-if="needImgEdit"></ImageUpload>
     </template>
   </PopModal>
 </template>
 
 <script>
+import ImageUpload from '_c/ImageUpload'
 import { convert, sTom } from '@/libs/utils'
 export default {
   name: 'UploadVideo',
+  components: {
+    ImageUpload
+  },
   props: {
     value: {
       default: false,
@@ -92,12 +103,17 @@ export default {
 
       uploadVideo: false,
       video: '', // 上传的视频文件
-      videoName: '', // 服务端存储的文件名
+      videoName: '', // 服务端存储的视频名
       videoType: '', // 文件类型
       videoUrl: '',
       played: false,
       editStatus: false,
       editLoaing: false,
+
+      img: [],
+      imgName: '', // 服务端存储的图片名
+      imgUrl: '',
+      needImgEdit: false,
 
       uploadImg: false,
       editSTime: '00:00',
@@ -138,7 +154,7 @@ export default {
       num.innerHTML = '0%'
       const file = event.target.files[0]
       if (convert(file.size) > 50) {
-        return this.$openNoticeModal({ msg: '文件不能超过50mb' })
+        return this.$openNoticeModal({ msg: '文件不能超过50mb!' })
       }
       const reader = new FileReader()
       reader.onloadstart = () => {
@@ -254,6 +270,7 @@ export default {
       }
       const div = document.querySelector('.edit-bar')
       div.style.display = 'none'
+      this.editStatus = !this.editStatus
       this.videoUrl = URL.createObjectURL(this.video)
     },
     hkDown (e, type) {
@@ -334,25 +351,28 @@ export default {
   /deep/.content {
     height: 600px;
     .video {
-      width: 40%;
+      width: 60%;
+      height: 100%;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      padding: 0 20px;
       .video-container,
       .video-control {
-        width: 75%;
+        width: 100%;
         display: flex;
         align-items: center;
         justify-content: center;
       }
       .video-container {
         position: relative;
+        flex: 1;
         .video-upload-input,
         .video-upload-btn,
         .video-content {
           width: 100%;
-          height: 400px;
+          height: 100%;
         }
         .video-upload-btn,
         .video-content {
@@ -395,7 +415,7 @@ export default {
               &:hover {
                 cursor: pointer;
                 opacity: 1;
-                background: @color-black-3;
+                background: @color-black-1-2;
               }
             }
           }
@@ -448,7 +468,7 @@ export default {
                 use {
                   &:hover {
                     cursor: pointer;
-                    color: @color-white;
+                    color: @color-white-1;
                   }
                 }
               }
@@ -458,11 +478,12 @@ export default {
       }
       .video-control {
         margin-top: 20px;
+        height: 50px;
         div {
           cursor: pointer;
           flex: 1;
           height: 50px;
-          background: @color-red;
+          background: @color-red-2;
           border-radius: 5px;
           text-align: center;
           line-height: 50px;
@@ -471,7 +492,7 @@ export default {
             margin-right: 20px;
           }
           &:hover {
-            color: @color-white;
+            color: @color-white-1;
           }
         }
         .video-confirm-edit-btn {
@@ -485,35 +506,38 @@ export default {
       }
     }
     .img {
-      display: flex;
-      position: relative;
       height: 100%;
+      display: flex;
+      flex-direction: column;
+      position: relative;
       flex: 1;
-      input {
-        width: 75%;
-        height: 400px;
-        position: absolute;
-        z-index: 1;
-        opacity: 0;
-        cursor: pointer;
+      .title {
+        margin-bottom: 10px;
+        color: @color-white-2;
       }
-      .upload-img {
-        width: 200px;
-        height: 100%;
-        position: relative;
-        &:hover {
-          .delete {
-            visibility: visible;
+      .img-container {
+        .img-container-control {
+          height: 120px;
+          padding: 0px 10px;
+          display: flex;
+          align-items: center;
+          background: @color-black-2-3;
+          .img-container-control-msg {
+            padding-left: 10px;
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            height: 100px;
+            div {
+              display: flex;
+              align-items: center;
+              &:last-child {
+                &:hover {
+                  cursor: pointer;
+                }
+              }
+            }
           }
-        }
-        .delete {
-          visibility: hidden;
-          position: absolute;
-          top: -7px;
-          right: -7px;
-          cursor: pointer;
-          background: @color-modal-2;
-          border-radius: 50%;
         }
       }
     }
