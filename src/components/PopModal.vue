@@ -125,7 +125,7 @@ export default {
       display: flex;
       justify-content: center;
       align-items: center;
-      color: @color-white-2;
+      color: @color-white-1;
       svg {
         position: absolute;
         right: 20px;

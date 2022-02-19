@@ -1,6 +1,5 @@
 const utils = require('../../utils')
-const express = require('express')
-const router = express.Router()
+const router = utils.express.Router()
 const User = require('./user')
 
 router.post('/user/findOne', (req, res) => {
@@ -73,56 +72,30 @@ router.post('/user/sign', (req, res) => {
 })
 router.post('/user/updateImg', (req, res) => {
   utils.findOne({ userId: req.body.userId }, User).then(data => {
-    const p1 = new Promise((resolve, reject) => {
-      if (data.userImg) {
-        utils.deletFile(utils.path.join(utils.dyimgPath, data.userImg)).then(() => {
-          resolve(true)
+    if (data.userImg) {
+      utils.deletFile(utils.path.join(utils.dyimgPath, data.userImg))
+    }
+    User.updateOne(
+      { userId: req.body.userId },
+      { userImg: req.body.userImg },
+      { new: true }
+    ).then(data => {
+      if (data.modifiedCount > 0) {
+        utils.findOne({ userId: req.body.userId }, User).then(data => {
+          res.json({
+            success: true,
+            msg: '更换头像成功!',
+            data: data
+          })
         }).catch(err => {
-          reject(err)
+          res.join({
+            success: false,
+            msg: '更换头像失败!',
+            data: {
+              err
+            }
+          })
         })
-      } else {
-        resolve(true)
-      }
-    })
-    const p2 = new Promise((resolve, reject) => {
-      try {
-        User.updateOne(
-          { userId: req.body.userId },
-          { userImg: req.body.userImg },
-          { new: true }
-        ).then(data => {
-          if (data.modifiedCount > 0) {
-            utils.findOne({ userId: req.body.userId }, User).then(data => {
-              resolve(data)
-            })
-          }
-        })
-      } catch (err) {
-        reject(err)
-      }
-    })
-
-    Promise.all([p1, p2]).then(data => {
-      res.json({
-        success: true,
-        msg: '更换头像成功!',
-        data: data[1]
-      })
-    }).catch(err => {
-      res.json({
-        success: false,
-        msg: '更换头像失败!',
-        data: {
-          err
-        }
-      })
-    })
-  }).catch(err => {
-    res.json({
-      success: false,
-      msg: '更换头像失败!',
-      data: {
-        err
       }
     })
   })

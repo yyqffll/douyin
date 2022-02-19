@@ -12,7 +12,7 @@
     <template #content>
       <div class="video">
         <div class="video-container">
-          <input class="video-upload-input" type="file" accept="video/*" @change="onUploadVideo" />
+          <input class="video-upload-input" type="file" accept="video/*" @change="videoUpload" />
           <div class="video-upload-btn" v-show="!uploadVideo">
             <SvgIcon url="#icon-shangchuan" fontSize="36"></SvgIcon>
             <span>点击上传视频</span>
@@ -21,7 +21,7 @@
           <div class="video-content" v-show="uploadVideo">
             <div class="video-upload">
               <video ref="uploadVideo" :src="videoUrl" width="100%" height="100%" style="object-fit: fill;"></video>
-              <div class="video-play-btn" @click="videoPreview">
+              <div class="video-play-btn" @click="onVideoPreview">
                 <template v-if="!editLoaing">
                   <SvgIcon url="#icon-bofang" fontSize="40" v-if="!played"></SvgIcon>
                   <SvgIcon url="#icon-zanting1" fontSize="40" v-else></SvgIcon>
@@ -49,35 +49,42 @@
             </div>
           </div>
         </div>
-        <div class="video-control">
-          <div @click="videoReUpload">重新上传</div>
-          <div @click="videoEdit">
+        <div :class="{'video-control': true, 'video-control-disabled': !uploadVideo}">
+          <div @click="onVideoReUpload">重新上传</div>
+          <div @click="onVideoEdit">
             <span>{{editStatus ? '取消剪辑' : '剪辑'}}</span>
           </div>
           <div @click="videoConfirmEdit" class="video-confirm-edit-btn">
             <span>{{editLoaing ? '剪辑中' : '确认剪辑'}}</span>
             <SvgIcon url="#icon-loading" v-if="editLoaing"></SvgIcon>
           </div>
-          <div @click="videoReEdit">重新剪辑</div>
+          <div @click="onVideoReEdit">重新剪辑</div>
         </div>
       </div>
       <div class="img">
-        <div class="img-container">
+        <div class="img-img">
           <p class="title">设置封面</p>
-          <div class="img-container-control">
-            <img :src="imgUrl" width="100" height="100" />
-            <div></div>
-            <div class="img-container-control-msg">
-              <div>默认获取视频第一帧</div>
-              <div>
-                <SvgIcon url="#icon-xiugai"></SvgIcon>
-                <span>编辑封面</span>
-              </div>
+          <div class="img-container">
+            <div class="img-container-img">
+              <div v-if="!imgUrl">封面</div>
+              <img v-else :src="imgUrl" width="100%" height="100%" />
+            </div>
+            <div class="img-container-control">
+              <div @click="onImgReUpload('上传封面')" v-if="imgName">重新上传</div>
+              <div @click="onImgUpload('上传封面')" v-else>上传封面</div>
+              <div @click="onImgEdit('编辑封面')">编辑封面</div>
             </div>
           </div>
         </div>
+        <div class="img-control" v-if="needImgControl">
+          <p>{{imgControlType}}</p>
+          <ImageUpload v-model="imgName" :img.sync="img" :canDelete="imgControlDelete" :imgUrl="imgUrlDefault"></ImageUpload>
+          <div class="img-control-btn">
+            <div @click="imgConfrimDo">确定</div>
+            <div @click="imgCancelDo">取消</div>
+          </div>
+        </div>
       </div>
-      <ImageUpload v-model="imgName" :img.sync="img" v-if="needImgEdit"></ImageUpload>
     </template>
   </PopModal>
 </template>
@@ -102,26 +109,30 @@ export default {
       loading: true,
 
       uploadVideo: false,
+      played: false,
+      editStatus: false,
+      editLoaing: false,
       video: '', // 上传的视频文件
       videoName: '', // 服务端存储的视频名
       videoType: '', // 文件类型
       videoUrl: '',
-      played: false,
-      editStatus: false,
-      editLoaing: false,
+      videoDuration: 0,
 
+      needImgControl: false,
+      imgControlType: false,
+      imgControlDelete: true,
       img: [],
       imgName: '', // 服务端存储的图片名
       imgUrl: '',
-      needImgEdit: false,
+      imgUrlDefault: '',
 
       uploadImg: false,
       editSTime: '00:00',
       editETime: '',
       params: {
-        videoId: '',
-        name: '',
-        duration: 0,
+        videoName: '',
+        videoType: '',
+        videoDuration: 0,
         img: '',
       }
     }
@@ -145,7 +156,7 @@ export default {
       })
     },
 
-    onUploadVideo (event) {
+    videoUpload (event) {
       const progressBar = document.querySelector('.progress-bar')
       const progress = document.querySelector('.progress')
       const num = document.querySelector('.num')
@@ -189,7 +200,8 @@ export default {
       reader.readAsBinaryString(file)
       event.target.value = ''
     },
-    videoReUpload () {
+    onVideoReUpload () {
+      if (!this.uploadVideo) return
       this.$axios({
         url: '/api/play/delete',
         data: {
@@ -200,9 +212,11 @@ export default {
         this.uploadVideo = false
         this.video = ''
         this.videoUrl = ''
+        this.videoName = ''
+        this.videoType = ''
       })
     },
-    videoPreview () {
+    onVideoPreview () {
       const uploadVideo = this.$refs.uploadVideo
       if (this.played) {
         uploadVideo.pause()
@@ -212,16 +226,15 @@ export default {
         this.played = true
       }
     },
-
     resetEdit () {
       const uploadVideo = this.$refs.uploadVideo
       uploadVideo.oncanplay = () => {
-        this.params.duration = uploadVideo.duration
-        this.editSTime = '00:00'
-        this.editETime = sTom(uploadVideo.duration)
+        this.videoDuration = uploadVideo.duration
       }
+      this.editSTime = '00:00'
+      this.editETime = sTom(uploadVideo.duration)
     },
-    videoEdit () {
+    onVideoEdit () {
       if (!this.uploadVideo) {
         return
       }
@@ -244,6 +257,10 @@ export default {
       if (!this.uploadVideo || this.editLoaing) {
         return
       }
+      if (!this.editStatus) {
+        this.onVideoEdit()
+        return
+      }
       this.editLoaing = true
       this.$axios({
         url: '/api/play/cut',
@@ -255,23 +272,35 @@ export default {
         }
       }).then(res => {
         this.editLoaing = false
+        this.editStatus = false
         const div = document.querySelector('.edit-bar')
         div.style.display = 'none'
         const arrayBuffer = Buffer.from(res.data.video.data, 'binary')
         const blob = new Blob([arrayBuffer])
         this.videoUrl = URL.createObjectURL(blob)
+        this.videoName = res.data.videoName
       }).catch(() => {
         this.editLoaing = false
       })
     },
-    videoReEdit () {
+    onVideoReEdit () {
       if (!this.uploadVideo) {
         return
       }
-      const div = document.querySelector('.edit-bar')
-      div.style.display = 'none'
-      this.editStatus = !this.editStatus
-      this.videoUrl = URL.createObjectURL(this.video)
+
+      this.$axios({
+        url: '/api/play/deleteEdit',
+        data: {
+          videoName: this.videoName,
+          videoType: this.videoType,
+        }
+      }).then(res => {
+        const div = document.querySelector('.edit-bar')
+        div.style.display = 'none'
+        this.editStatus = false
+        this.videoUrl = URL.createObjectURL(this.video)
+        this.videoName = res.data.videoName
+      })
     },
     hkDown (e, type) {
       const divBar = document.querySelector('.edit-bg')
@@ -298,10 +327,10 @@ export default {
           const moveX = fPosition - x
           if (type === 'S') {
             fDom.style.left = (moveX < 0 ? 0 : moveX + Width < bPosition ? moveX : bPosition - Width) + 'px'
-            this.editSTime = sTom(parseInt(fDom.style.left) / barWidth * this.params.duration)
+            this.editSTime = sTom(parseInt(fDom.style.left) / barWidth * this.videoDuration)
           } else {
             fDom.style.left = (moveX < bPosition + Width ? bPosition + Width : moveX > barWidth - Width ? barWidth - Width : moveX) + 'px'
-            this.editETime = sTom((parseInt(fDom.style.left) + Width) / barWidth * this.params.duration)
+            this.editETime = sTom((parseInt(fDom.style.left) + Width) / barWidth * this.videoDuration)
           }
         }
         document.onmouseup = () => {
@@ -312,24 +341,66 @@ export default {
       }
     },
 
-    onUploadImg (e) {
-      const file = e.target.files[0]
-      const filesize = file.size
-      if (convert(filesize) > 10) {
-        this.$openNoticeModal({ msg: '请上传10mb大小以内的图片!' })
-      } else {
-        const reader = new FileReader()
-        reader.onloadstart = () => {
-          this.uploadImg = true
-        }
-        reader.onloadend = (e) => {
-          this.params.img = e.target.result
-        }
-        reader.readAsDataURL(file)
-      }
-      e.target.value = ''
+    closeImgContaol () {
+      this.needImgControl = false
+      this.imgUrlDefault = ''
+      this.imgControlType = ''
     },
-    deleteImg () { },
+    async deleteImg () {
+      await this.$axios({
+        url: '/api/img/delete',
+        data: {
+          imgName: this.imgName
+        }
+      }).then(() => {
+        this.imgName = ''
+        this.imgUrl = ''
+        this.img = []
+      })
+    },
+    onImgReUpload (type) {
+      this.deleteImg()
+      this.onImgUpload(type)
+    },
+    onImgUpload (type) {
+      this.needImgControl = true
+      this.imgControlType = type
+      this.imgControlDelete = true
+    },
+    onImgEdit (type) {
+      this.needImgControl = true
+      this.imgControlType = type
+      this.imgControlDelete = false
+      this.imgUrlDefault = this.imgUrl
+    },
+    imgConfrimDo () {
+      if (!this.imgName) {
+        this.$openNoticeModal({
+          msg: '请先上传图片!'
+        })
+        return
+      }
+      if (this.imgControlType === '编辑封面') {
+        const file = new File([this.img[0]], this.imgName, { type: this.img[1] })
+        const param = new FormData()
+        param.append('file', file)
+        this.$axios({
+          url: '/api/img/upload',
+          data: param,
+        }).then(res => {
+          this.imgName = res.data.filename
+        })
+      }
+      this.imgUrl = URL.createObjectURL(this.img[0])
+      this.closeImgContaol()
+    },
+    async imgCancelDo () {
+      if (this.imgControlType === '上传封面' && this.imgName) {
+        await this.deleteImg()
+      }
+      this.closeImgContaol()
+    },
+
     confrimUpload () { },
     cancelUpload () {
       this.show = false
@@ -504,6 +575,11 @@ export default {
           }
         }
       }
+      .video-control-disabled {
+        div {
+          cursor: not-allowed;
+        }
+      }
     }
     .img {
       height: 100%;
@@ -513,29 +589,72 @@ export default {
       flex: 1;
       .title {
         margin-bottom: 10px;
-        color: @color-white-2;
+        color: @color-white-1;
       }
-      .img-container {
-        .img-container-control {
+      .img-img {
+        .img-container {
+          display: flex;
           height: 120px;
-          padding: 0px 10px;
           display: flex;
           align-items: center;
-          background: @color-black-2-3;
-          .img-container-control-msg {
-            padding-left: 10px;
-            flex: 1;
-            display: flex;
-            justify-content: space-between;
+          .img-container-control {
             height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            margin-left: 10px;
             div {
-              display: flex;
-              align-items: center;
-              &:last-child {
-                &:hover {
-                  cursor: pointer;
-                }
+              cursor: pointer;
+              width: 80px;
+              height: 40px;
+              background: @color-red-2;
+              border-radius: 5px;
+              text-align: center;
+              line-height: 40px;
+              font-size: 14px;
+              &:hover {
+                color: @color-white-1;
               }
+            }
+          }
+        }
+        .img-container-img {
+          width: 100px;
+          height: 100px;
+          border: 1px solid @color-font-basic;
+          div {
+            text-align: center;
+            line-height: 100px;
+          }
+        }
+      }
+      .img-control {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        background: @color-black-3;
+        .image-upload {
+          margin: 20px 0;
+          flex: 1;
+        }
+        .img-control-btn {
+          display: flex;
+          div {
+            &:first-child {
+              margin-right: 20px;
+            }
+            cursor: pointer;
+            width: 80px;
+            height: 50px;
+            background: @color-red-2;
+            border-radius: 5px;
+            text-align: center;
+            line-height: 50px;
+            font-size: 14px;
+            &:hover {
+              color: @color-white-1;
             }
           }
         }

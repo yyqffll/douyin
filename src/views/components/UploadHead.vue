@@ -8,7 +8,7 @@
     @on-cancel="cancelUpload"
   >
     <template #content>
-      <ImageUpload v-model="imgName" :img.sync="img"></ImageUpload>
+      <ImageUpload v-model="imgName" :img.sync="img" :imgUrl="imgUrl"></ImageUpload>
     </template>
   </PopModal>
 </template>
@@ -17,7 +17,7 @@
 import { mapActions } from 'vuex'
 import ImageUpload from '_c/ImageUpload.vue'
 export default {
-  name: 'UploadImg',
+  name: 'UploadHead',
   components: {
     ImageUpload
   },
@@ -32,8 +32,12 @@ export default {
       show: this.value,
       loading: true,
       imgName: '',
-      img: null
+      img: null,
+      imgUrl: '',
     }
+  },
+  computed: {
+
   },
   methods: {
     ...mapActions(['updateUserImg']),
@@ -57,10 +61,11 @@ export default {
         data: param,
       }).then(res => {
         this.imgName = res.data.filename
+        this.changeLadoing()
         this.updateUserImg({
           userImg: this.imgName
         }).then(res => {
-          this.cancelUpload()
+          this.closeModal()
           this.$openNoticeModal({
             msg: res.msg
           })
@@ -69,19 +74,40 @@ export default {
         this.changeLadoing()
       })
     },
-    cancelUpload () {
+    closeModal () {
       this.show = false
       this.imgName = ''
       this.img = null
+      this.imgUrl = ''
+    },
+    cancelUpload () {
+      if (!this.imgUrl && this.imgName) {
+        this.$axios({
+          url: 'api/img/delete',
+          data: {
+            imgName: this.imgName
+          }
+        })
+      }
+      this.closeModal()
     },
   },
   watch: {
     value (val) {
       this.show = val
+      if (val) {
+        this.imgName = this.$store.state?.userImg
+        this.imgUrl = this.$store.state?.userImgUrl
+      }
     },
     show (val) {
       this.$emit('input', val)
     },
+    imgName (val) {
+      if (!val) {
+        this.imgUrl = ''
+      }
+    }
   }
 }
 </script>

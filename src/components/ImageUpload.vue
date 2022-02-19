@@ -1,21 +1,13 @@
 <template>
   <div class="image-upload">
     <input ref="input" type="file" accept="image/*" title="点击上传图片" @change="onUploadFile" />
-    <div class="img" v-show="uploadImg">
-      <span class="delete" @click="deleteImg" title="删除">
+    <div class="img" v-if="uploadImg">
+      <span class="delete" @click="deleteImg" title="删除" v-show="canDelete">
         <SvgIcon url="#icon-xiaoshanchu"></SvgIcon>
       </span>
-      <vueCropper
-        ref="cropper"
-        :img="option.imgUrl"
-        :autoCrop="option.autoCrop"
-        :centerBox="option.centerBox"
-        :mode="option.mode"
-        :original="option.original"
-        @realTime="realTime"
-      ></vueCropper>
+      <vueCropper ref="cropper" :img="option.imgUrl" :autoCrop="autoCrop" :centerBox="centerBox" @realTime="realTime"></vueCropper>
     </div>
-    <div class="upload" v-show="!uploadImg"></div>
+    <div class="upload" v-else></div>
   </div>
 </template>
 
@@ -27,18 +19,28 @@ export default {
     value: {
       default: ''
     },
+    canDelete: {
+      default: true
+    },
+    autoCrop: {
+      default: true
+    },
+    centerBox: {
+      default: true,
+    },
+    imgUrl: {
+      // 有值表示图片预览
+      default: ''
+    }
   },
   data () {
     return {
       uploadImg: false,
+      defaultImgUrl: '',
       option: {
         imgName: '',
         imgType: '',
         imgUrl: '',
-        autoCrop: true,
-        centerBox: true,
-        mode: '100%',
-        original: false
       },
     }
   },
@@ -74,6 +76,14 @@ export default {
       event.target.value = ''
     },
     deleteImg () {
+      if (this.defaultImgUrl) {
+        this.uploadImg = false
+        this.defaultImgUrl = ''
+        this.option.imgName = ''
+        this.option.imgUrl = ''
+        this.$emit('input', '')
+        return
+      }
       if (!this.option.imgName) return
       this.$axios({
         url: 'api/img/delete',
@@ -95,7 +105,7 @@ export default {
       this.$refs.cropper.getCropBlob(data => {
         this.$emit('update:img', [data, this.option.imgType])
       })
-    }
+    },
   },
   watch: {
     value: {
@@ -108,6 +118,16 @@ export default {
         }
       },
     },
+    imgUrl: {
+      handler (val) {
+        if (val) {
+          this.uploadImg = true
+          this.defaultImgUrl = val
+          this.option.imgUrl = val
+        }
+      },
+      immediate: true
+    }
   }
 }
 </script>

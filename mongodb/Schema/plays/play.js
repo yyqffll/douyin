@@ -2,7 +2,9 @@ const mongoose = require('../../index')
 const Schema = mongoose.Schema
 const VideoSchema = new Schema({
   userId: { type: String },
-  videoId: { type: String },
+  videoName: { type: String },
+  videoType: { type: String },
+  videoDuration: { type: Number },
 
   name: { type: String },
   img: { type: String },

@@ -6,97 +6,86 @@
  * videoEditPath 剪辑视频完整路径
  */
 
-const express = require('express')
-const path = require('path')
-const fs = require('fs')
-const router = express.Router()
+const utils = require('../../utils')
+const router = utils.express.Router()
 
-const multer = require('multer')
-const FfmpegCommand = require('fluent-ffmpeg')
-const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path
-FfmpegCommand.setFfmpegPath(ffmpegPath)
+const uploadDest = utils.multer({
+  dest: utils.dyvideoPath
+}).single('file')
 
-const dirPath = path.join(__dirname, '../../../dyvideo')
-
-const uploadDest = multer({
-  dest: dirPath
-})
-
-const findFile = (path) => {
-  return fs.existsSync(path)
+const nameEnd = req => {
+  return `-edit.${req.body.videoType}`
 }
 
-const readFile = (path) => {
-  return new Promise((resolve, reject) => {
-    fs.readFile(path, (err, data) => {
-      if (err) {
-        reject(err)
-      } else {
-        resolve(data)
-      }
-    })
-  })
+const videoPath = req => {
+  return utils.path.join(utils.dyvideoPath, req.body.videoName)
 }
 
-const deletFile = (path) => {
-  return new Promise((resolve, reject) => {
-    fs.unlink(path, err => {
-      if (err) {
-        reject(err)
-      } else {
-        resolve(true)
-      }
-    })
-  })
+const videoEditPath = req => {
+  return utils.path.join(utils.dyvideoPath, `${req.body.videoName.replace(nameEnd(req), '')}${nameEnd(req)}`)
 }
 
-router.post('/play/upload', uploadDest.single('file'), (req, res) => {
+router.post('/play/upload', uploadDest, (req, res) => {
   if (req.file) {
     res.json({
       success: true,
-      msg: '上传成功!',
+      msg: '视频上传成功!',
       data: req.file
     })
     return
   }
   res.json({
     success: false,
-    msg: '上传失败!',
+    msg: '视频上传失败!',
   })
 })
 
 router.post('/play/delete', (req, res) => {
-  const videoPath = path.join(dirPath, req.body.videoName)
-  const videoEditPath = path.join(dirPath, `${req.body.name}-edit.${req.body.videoType}`)
   const p1 = new Promise((resolve, reject) => {
-    deletFile(videoPath).then(() => {
+    utils.deletFile(videoPath(req)).then(() => {
       resolve(true)
     }).catch(err => {
       reject(err)
     })
   })
   const p2 = new Promise((resolve, reject) => {
-    if (findFile(videoEditPath)) {
-      deletFile(videoEditPath).then(() => {
-        resolve(true)
-      }).catch(err => {
-        reject(err)
-      })
-    } else {
+    utils.deletFile(videoEditPath(req)).then(() => {
       resolve(true)
-    }
+    }).catch(err => {
+      reject(err)
+    })
   })
   Promise.all([p1, p2]).then(() => {
     res.json({
       success: true,
-      msg: '删除成功!'
+      msg: '视频删除成功!'
     })
   }).catch(err => {
     res.json({
       success: false,
-      msg: '删除失败!',
+      msg: '视频删除失败!',
       data: {
-        error: err
+        err
+      }
+    })
+  })
+})
+
+router.post('/play/deleteEdit', (req, res) => {
+  utils.deletFile(videoEditPath(req)).then(() => {
+    res.json({
+      success: true,
+      msg: '剪辑视频删除成功!',
+      data: {
+        videoName: req.body.videoName.replace(nameEnd(req), '')
+      }
+    })
+  }).catch(err => {
+    res.json({
+      success: false,
+      msg: '剪辑视频删除失败!',
+      data: {
+        err
       }
     })
   })
@@ -104,56 +93,54 @@ router.post('/play/delete', (req, res) => {
 
 router.post('/play/cut', (req, res) => {
   const cut = (path, targetPath, req, res) => {
-    FfmpegCommand(path)
-      .seekInput(req.body.startTime)
-      .duration(req.body.endTime)
-      .output(targetPath)
-      .on('err', err => {
-        res.json({
-          success: false,
-          msg: '视频剪辑失败!',
-          data: {
-            error: err
+    return new Promise((resolve, reject) => {
+      let newPath = ''
+      if (!req.body.videoName.includes('edit')) {
+        utils.deletFile(videoEditPath(req))
+        newPath = path
+      } else {
+        newPath = `${req.body.videoName.replace(nameEnd(req))}-oldEdit.${req.body.videoType}`
+        utils.renameFile(path, newPath).catch(err => {
+          reject(err)
+        })
+      }
+      utils.FfmpegCommand(newPath)
+        .seekInput(req.body.startTime)
+        .duration(req.body.endTime)
+        .output(targetPath)
+        .on('err', err => {
+          reject(err)
+        })
+        .on('end', () => {
+          if (newPath !== path) {
+            utils.deletFile(newPath)
           }
-        })
-      })
-      .on('end', () => {
-        readFile(targetPath).then(data => {
-          res.json({
-            success: true,
-            msg: '剪辑成功!',
-            data: {
-              video: data
-            }
-          })
-        }).catch(err => {
-          res.json({
-            success: false,
-            msg: '剪辑后文件读取失败!',
-            data: {
-              error: err
-            }
+          utils.readFile(targetPath).then(data => {
+            resolve(data)
+          }).catch(err => {
+            reject(err)
           })
         })
-      })
-      .run()
-  }
-  const videoPath = path.join(dirPath, req.body.videoName)
-  const videoEditPath = path.join(dirPath, `${req.body.videoName}-edit.${req.body.videoType}`)
-  if (findFile(videoEditPath)) {
-    deletFile(videoEditPath).then(() => {
-      cut(videoPath, videoEditPath, req, res)
-    }).catch(err => {
-      res.json({
-        success: false,
-        msg: '未知错误,请联系管理员!',
-        data: {
-          error: err
-        }
-      })
+        .run()
     })
-  } else {
-    cut(videoPath, videoEditPath, req, res)
   }
+  cut(videoPath(req), videoEditPath(req), req, res).then(data => {
+    res.json({
+      success: true,
+      msg: '视频剪辑成功!',
+      data: {
+        video: data,
+        videoName: `${req.body.videoName.replace(nameEnd(req), '')}${nameEnd(req)}`
+      }
+    })
+  }).catch(err => {
+    res.json({
+      success: false,
+      msg: '视频剪辑失败!',
+      data: {
+        err
+      }
+    })
+  })
 })
 module.exports = router

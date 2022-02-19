@@ -66,7 +66,7 @@
             <div class="user-inf">
               <div v-for="item in userItem" :key="item.title">
                 <SvgIcon :url="item.url"></SvgIcon>
-                <p style="font-weight: 600; color: @color-white-1;">{{item.total}}</p>
+                <p style="font-weight: 600;">{{item.total}}</p>
                 <p style="font-size: 12px;">{{item.title}}</p>
               </div>
             </div>
@@ -84,7 +84,7 @@
       <!-- <router-view /> -->
     </div>
     <LoginModal v-model="loginModalShow"></LoginModal>
-    <UploadImg v-model="uploadImgShow"></UploadImg>
+    <UploadHead v-model="UploadHeadShow"></UploadHead>
     <UploadVideo v-model="uploadVideoShow"></UploadVideo>
   </div>
 </template>
@@ -92,13 +92,13 @@
 <script>
 import { mapState, mapActions } from 'vuex'
 import LoginModal from '@/views/components/LoginModal'
-import UploadImg from '@/views/components/UploadImg'
+import UploadHead from '@/views/components/UploadHead'
 import UploadVideo from '@/views/components/UploadVideo'
 export default {
   name: 'MainLayout',
   components: {
     LoginModal,
-    UploadImg,
+    UploadHead,
     UploadVideo
   },
   data () {
@@ -144,7 +144,7 @@ export default {
       ],
 
       loginModalShow: false,
-      uploadImgShow: false,
+      UploadHeadShow: false,
       uploadVideoShow: false,
     }
   },
@@ -257,7 +257,7 @@ export default {
       })
     },
     handleChangeHead () {
-      this.uploadImgShow = true
+      this.UploadHeadShow = true
     },
 
     handleOperate () { },
@@ -337,8 +337,8 @@ export default {
         }
         & > .search-history-item:not(:first-child) {
           cursor: pointer;
+          background: @color-black-3;
           &:hover {
-            background: @color-black-3;
             .icon {
               visibility: visible;
             }
