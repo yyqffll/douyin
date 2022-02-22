@@ -2,7 +2,7 @@
   <div class="video-player" ref="videoPlayer">
     <div class="video-player-container">
       <video :src="option.videoUrl"></video>
-      <SvgIcon url="#icon-kaishi" fontSize="68" v-if="videoStatus === false"></SvgIcon>
+      <SvgIcon url="#icon-kaishi" fontSize="68" @click="setVideoStatus" v-if="videoStatus === false"></SvgIcon>
     </div>
     <div class="video-player-control">
       <div class="control-time-line" @click="setVideoTime($event, 'click')">
@@ -274,7 +274,7 @@ export default {
     z-index: 9;
     video {
       width: 100%;
-      height: 100%;
+      height: calc(100% - 80px);
       transform: translateY(-30px);
     }
     svg {
