@@ -188,11 +188,9 @@ router.post('/play/findAll', (req, res) => {
           finalItem.video = null
           finalItem.img = null
           utils.readFile(videoPath({ body: item })).then(data => {
-            console.log('video')
             finalItem.video = data
           })
           utils.readFile(videoImgPath({ body: item })).then(data => {
-            console.log('img')
             finalItem.img = data
           })
           finalData.push(finalItem)
