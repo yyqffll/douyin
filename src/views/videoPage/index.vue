@@ -1,6 +1,6 @@
 <template>
-  <div class="video-page">
-    <swiper :options="swiperOption" class="swiper" ref="swiper">
+  <div ref="videoPage" class="video-page">
+    <swiper :options="swiperOption" class="swiper" ref="swiper" v-if="videoLists.length > 0">
       <swiper-slide v-for="(item, index) in videoLists" :key="index">
         <VideoPlayer ref="video" :option="item"></VideoPlayer>
       </swiper-slide>
@@ -12,6 +12,8 @@
 import { swiper, swiperSlide } from 'vue-awesome-swiper'
 import VideoPlayer from '@/components/VideoPlayer'
 
+import { bufferToUrl } from '@/libs/utils'
+
 export default {
   name: 'videoPage',
   components: {
@@ -21,16 +23,7 @@ export default {
   },
   data () {
     return {
-      videoLists: [
-        {
-          src: '',
-          img: '',
-        },
-        {
-          src: '',
-          img: '',
-        }
-      ],
+      videoLists: [],
       swiperOption: {
         direction: 'vertical',
         spaceBetween: 30,
@@ -38,6 +31,7 @@ export default {
         keyboard: {
           enabled: true
         },
+        allowTouchMove: false,
         on: {
           init: () => {
             const activeVideo = this.$refs.swiper.$el.querySelector('.swiper-slide-active')
@@ -62,9 +56,24 @@ export default {
             })
           }
         }
-      }
+      },
     }
-  }
+  },
+  mounted () {
+    this.$axios({
+      url: '/api/play/findAll',
+      data: {
+        length: this.videoLists.length
+      }
+    }).then(res => {
+      res.data.forEach(item => {
+        this.videoLists.push(Object.assign({}, item, {
+          videoUrl: bufferToUrl(item.video.data),
+          imgUrl: bufferToUrl(item.img.data)
+        }))
+      })
+    })
+  },
 }
 </script>
 

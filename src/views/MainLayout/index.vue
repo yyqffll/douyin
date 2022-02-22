@@ -81,7 +81,7 @@
       </div>
     </header>
     <div class="main-content">
-      <!-- <router-view /> -->
+      <router-view />
     </div>
     <LoginModal v-model="loginModalShow"></LoginModal>
     <UploadHead v-model="UploadHeadShow"></UploadHead>

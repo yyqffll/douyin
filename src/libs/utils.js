@@ -60,7 +60,7 @@ export const decrypt = (word) => {
 
 // 除
 export function mod (a, b) {
-  let decimal = 0
+  let decimal = 10
   let al = 0
   let bl = 0
   if (a.toString().includes('.')) {
@@ -69,7 +69,7 @@ export function mod (a, b) {
   if (b.toString().includes('.')) {
     bl = b.toString().split('.')[1].length
   }
-  decimal = al > bl ? al : bl
+  decimal = Math.pow(decimal, al > bl ? al : bl)
   return (a * decimal) / (b * decimal)
 }
 

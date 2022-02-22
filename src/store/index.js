@@ -59,14 +59,16 @@ export default new Vuex.Store({
           commit('setUserId', res.data.userId)
           commit('setUserName', res.data.userName)
           commit('setUserImg', res.data.userImg)
-          request({
-            url: '/api/img/find',
-            data: {
-              imgName: res.data.userImg
-            }
-          }).then(res => {
-            commit('setUserImgUrl', bufferToUrl(res.data.img.data))
-          })
+          if (res.data.userImg) {
+            request({
+              url: '/api/img/find',
+              data: {
+                imgName: res.data.userImg
+              }
+            }).then(res => {
+              commit('setUserImgUrl', bufferToUrl(res.data.img.data))
+            })
+          }
           resolve(res)
         }).catch(err => {
           reject(err)
@@ -91,14 +93,16 @@ export default new Vuex.Store({
           commit('setUserId', res.data.userId)
           commit('setUserName', res.data.userName)
           commit('setUserImg', res.data.userImg)
-          request({
-            url: '/api/img/find',
-            data: {
-              imgName: res.data.userImg
-            }
-          }).then(res => {
-            commit('setUserImgUrl', bufferToUrl(res.data.img.data))
-          })
+          if (res.data.userImg) {
+            request({
+              url: '/api/img/find',
+              data: {
+                imgName: res.data.userImg
+              }
+            }).then(res => {
+              commit('setUserImgUrl', bufferToUrl(res.data.img.data))
+            })
+          }
           resolve(res)
         }).catch(err => {
           reject(err)

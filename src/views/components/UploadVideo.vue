@@ -20,7 +20,7 @@
           </div>
           <div class="video-content" v-show="uploadVideo">
             <div class="video-upload">
-              <video ref="uploadVideo" :src="videoUrl" width="100%" height="100%" style="object-fit: fill;"></video>
+              <video ref="uploadVideo" :src="videoUrl"></video>
               <div class="video-play-btn" @click="onVideoPreview">
                 <template v-if="!editLoaing">
                   <SvgIcon url="#icon-bofang" fontSize="40" v-if="!played"></SvgIcon>
@@ -38,10 +38,10 @@
             <div class="edit-bar">
               <span class="time">{{editSTime}}</span>
               <div class="edit-bg">
-                <div id="huakuaiS" @mousedown="hkDown($event, 'S')">
+                <div id="huakuaiS" @mousedown.left="hkDown($event, 'S')">
                   <SvgIcon url="#icon-huakuaiS" fontSize="20"></SvgIcon>
                 </div>
-                <div id="huakuaiE" @mousedown="hkDown($event, 'E')" style="transform:scaleX(-1);">
+                <div id="huakuaiE" @mousedown.left="hkDown($event, 'E')" style="transform:scaleX(-1);">
                   <SvgIcon url="#icon-huakuaiS" fontSize="20"></SvgIcon>
                 </div>
               </div>
@@ -61,8 +61,8 @@
           <div @click="onVideoReEdit">重新剪辑</div>
         </div>
       </div>
-      <div class="img">
-        <div class="img-img">
+      <div class="video-inf">
+        <div class="img">
           <p class="title">设置封面</p>
           <div class="img-container">
             <div class="img-container-img">
@@ -73,6 +73,53 @@
               <div @click="onImgReUpload('上传封面')" v-if="imgName">重新上传</div>
               <div @click="onImgUpload('上传封面')" v-else>上传封面</div>
               <div @click="onImgEdit('编辑封面')">编辑封面</div>
+            </div>
+          </div>
+        </div>
+        <div class="describe">
+          <p class="title">视频描述</p>
+          <div class="describe-container">
+            <textarea maxlength="100" @input="imgDesChange" v-model="videoDescribe"></textarea>
+            <div class="describe-count">
+              <span>{{desMin}}</span>
+              <span>/</span>
+              <span>{{desMax}}</span>
+            </div>
+          </div>
+          <div class="describe-control">
+            <p>
+              #
+              <span>添加话题</span>
+            </p>
+            <p>
+              @
+              <span>好友</span>
+            </p>
+          </div>
+        </div>
+        <div class="download">
+          <p class="title">允许他人保存视频</p>
+          <div class="download-control">
+            <div :class="{'download-click': videoDownload}" @click="() => videoDownload = true">
+              <SvgIcon :url="videoDownload ? '#icon-selected' : '#icon-noselected'"></SvgIcon>
+              <span>允许</span>
+            </div>
+            <div :class="{'download-click': !videoDownload}" @click="() => videoDownload = false">
+              <SvgIcon :url="videoDownload ? '#icon-noselected' : '#icon-selected'"></SvgIcon>
+              <span>不允许</span>
+            </div>
+          </div>
+        </div>
+        <div class="open">
+          <p class="title">是否公开发布</p>
+          <div class="open-control">
+            <div :class="{'open-click': videoOpen}" @click="() => videoOpen = true">
+              <SvgIcon :url="videoOpen ? '#icon-selected' : '#icon-noselected'"></SvgIcon>
+              <span>公开</span>
+            </div>
+            <div :class="{'open-click': !videoOpen}" @click="() => videoOpen = false">
+              <SvgIcon :url="videoOpen ? '#icon-noselected' : '#icon-selected'"></SvgIcon>
+              <span>不公开</span>
             </div>
           </div>
         </div>
@@ -117,6 +164,8 @@ export default {
       videoType: '', // 文件类型
       videoUrl: '',
       videoDuration: 0,
+      editSTime: '00:00',
+      editETime: '',
 
       needImgControl: false,
       imgControlType: false,
@@ -125,15 +174,23 @@ export default {
       imgName: '', // 服务端存储的图片名
       imgUrl: '',
       imgUrlDefault: '',
+      videoDescribe: '',
+      videoDownload: false,
+      videoOpen: true,
+      desMin: 0,
+      desMax: 100,
 
-      uploadImg: false,
-      editSTime: '00:00',
-      editETime: '',
       params: {
+        userId: '',
         videoName: '',
         videoType: '',
         videoDuration: 0,
-        img: '',
+        videoImgName: '',
+        videoDescribe: '',
+        videoDownload: false,
+        videoOpen: true,
+        videoLikeNum: 0,
+        videoCollectNum: 0
       }
     }
   },
@@ -143,12 +200,13 @@ export default {
     }
   },
   mounted () {
-    this.uploadVideoModal.addEventListener('mouseover', () => { })
+    this.uploadVideoModal.addEventListener('mouseover', this.mouseover)
   },
-  destroyed () {
-    this.uploadVideoModal.removeEventListener('mouseover')
+  beforeDestroy () {
+    this.uploadVideoModal.removeEventListener('mouseover', this.mouseover)
   },
   methods: {
+    mouseover () { },
     changeLadoing () {
       this.loading = false
       this.$nextTick(() => {
@@ -230,9 +288,9 @@ export default {
       const uploadVideo = this.$refs.uploadVideo
       uploadVideo.oncanplay = () => {
         this.videoDuration = uploadVideo.duration
+        this.editSTime = '00:00'
+        this.editETime = sTom(uploadVideo.duration)
       }
-      this.editSTime = '00:00'
-      this.editETime = sTom(uploadVideo.duration)
     },
     onVideoEdit () {
       if (!this.uploadVideo) {
@@ -291,7 +349,7 @@ export default {
       this.$axios({
         url: '/api/play/deleteEdit',
         data: {
-          videoName: this.videoName,
+          videoName: this.videoName.replace(`-edit.${this.videoType}`, ''),
           videoType: this.videoType,
         }
       }).then(res => {
@@ -322,7 +380,7 @@ export default {
         }
         fPosition = parseInt(fDom.offsetLeft)
         bPosition = parseInt(bDom.offsetLeft)
-        document.onmousemove = (event) => {
+        const move = (event) => {
           x = e.clientX - event.clientX
           const moveX = fPosition - x
           if (type === 'S') {
@@ -333,8 +391,9 @@ export default {
             this.editETime = sTom((parseInt(fDom.style.left) + Width) / barWidth * this.videoDuration)
           }
         }
+        document.addEventListener('mousemove', move)
         document.onmouseup = () => {
-          document.onmousemove = null
+          document.removeEventListener('mousemove', move)
           document.onmouseup = null
           return false
         }
@@ -400,10 +459,108 @@ export default {
       }
       this.closeImgContaol()
     },
+    imgDesChange () {
+      if (this.videoDescribe.length > 100) {
+        this.videoDescribe = this.videoDescribe.subString(0, 99)
+      }
+      this.desMin = this.videoDescribe.length
+    },
 
-    confrimUpload () { },
-    cancelUpload () {
+    closeModal () {
       this.show = false
+      this.uploadVideo = false
+      this.played = false
+      this.editStatus = false
+      this.editLoaing = false
+      this.video = ''
+      this.videoName = ''
+      this.videoType = ''
+      this.videoUrl = ''
+      this.videoDuration = 0
+      this.editSTime = '00:00'
+      this.editETime = ''
+      this.needImgControl = false
+      this.imgControlType = false
+      this.imgControlDelete = true
+      this.img = []
+      this.imgName = ''
+      this.imgUrl = ''
+      this.imgUrlDefault = ''
+      this.videoDescribe = ''
+      this.videoDownload = false
+      this.videoOpen = true
+      this.desMin = 0
+      this.desMax = 100
+      this.params = {
+        userId: '',
+        videoName: '',
+        videoType: '',
+        videoDuration: 0,
+        videoImgName: '',
+        videoDescribe: '',
+        videoDownload: false,
+        videoOpen: true,
+        videoLikeNum: 0,
+        videoCollectNum: 0
+      }
+    },
+    confrimUpload () {
+      if (!this.videoName) {
+        this.$openNoticeModal({ msg: '请上传视频!' })
+        this.changeLadoing()
+        return
+      }
+      if (!this.imgName) {
+        this.$openNoticeModal({ msg: '请上传视频封面' })
+        this.changeLadoing()
+        return
+      }
+      if (!this.videoDescribe) {
+        this.$openNoticeModal({ msg: '请输入视频描述' })
+        this.changeLadoing()
+        return
+      }
+      const params = Object.assign({}, this.params, {
+        userId: this.$store.state?.userId,
+        videoName: this.videoName,
+        videoType: this.videoType,
+        videoDuration: this.videoDuration,
+        videoImgName: this.imgName,
+        videoDescribe: this.videoDescribe,
+        videoDownload: this.videoDownload,
+        videoOpen: this.videoOpen,
+        videoLikeNum: this.videoLikeNum,
+        videoCollectNum: this.videoCollectNum
+      })
+      this.$axios({
+        url: '/api/play/add',
+        data: params
+      }).then(res => {
+        this.closeModal()
+        this.$openNoticeModal({
+          msg: res.msg
+        })
+      })
+    },
+    cancelUpload () {
+      if (this.videoName) {
+        this.$axios({
+          url: '/api/play/delete',
+          data: {
+            videoName: this.videoName.replace(`-edit.${this.videoType}`, ''),
+            videoType: this.videoType
+          }
+        })
+      }
+      if (this.imgName) {
+        this.$axios({
+          url: '/api/img/delete',
+          data: {
+            imgName: this.imgName
+          }
+        })
+      }
+      this.closeModal()
     },
   },
   watch: {
@@ -426,7 +583,6 @@ export default {
       height: 100%;
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
       padding: 0 20px;
       .video-container,
@@ -438,7 +594,7 @@ export default {
       }
       .video-container {
         position: relative;
-        flex: 1;
+        height: calc(100% - 70px);
         .video-upload-input,
         .video-upload-btn,
         .video-content {
@@ -467,6 +623,12 @@ export default {
             width: 100%;
             height: 100%;
             position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            video {
+              height: 100%;
+            }
             .video-play-btn {
               position: absolute;
               width: 100%;
@@ -581,7 +743,7 @@ export default {
         }
       }
     }
-    .img {
+    .video-inf {
       height: 100%;
       display: flex;
       flex-direction: column;
@@ -591,12 +753,21 @@ export default {
         margin-bottom: 10px;
         color: @color-white-1;
       }
-      .img-img {
+      .img {
         .img-container {
           display: flex;
           height: 120px;
           display: flex;
           align-items: center;
+          .img-container-img {
+            width: 100px;
+            height: 100px;
+            border: 1px solid @color-font-basic;
+            div {
+              text-align: center;
+              line-height: 100px;
+            }
+          }
           .img-container-control {
             height: 100px;
             display: flex;
@@ -618,13 +789,60 @@ export default {
             }
           }
         }
-        .img-container-img {
-          width: 100px;
-          height: 100px;
-          border: 1px solid @color-font-basic;
+      }
+      .describe {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 10px;
+        .describe-container {
+          position: relative;
+          textarea {
+            box-sizing: border-box;
+            width: 100%;
+            height: 120px;
+            padding: 10px 30px 10px 10px;
+            resize: none;
+            overflow-y: auto;
+            background: @color-black-3;
+            color: @color-font-basic;
+            font-size: 16px;
+            position: relative;
+            white-space: break-spaces;
+          }
+          .describe-count {
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+          }
+        }
+        .describe-control {
+          display: flex;
+          p {
+            padding: 5px 10px;
+            background: @color-black-2-2;
+            cursor: pointer;
+            &:first-child {
+              margin-right: 20px;
+            }
+          }
+        }
+      }
+      .download,
+      .open {
+        margin-bottom: 10px;
+        .download-control,
+        .open-control {
+          display: flex;
           div {
-            text-align: center;
-            line-height: 100px;
+            cursor: pointer;
+            width: 100px;
+            svg {
+              margin-right: 5px;
+            }
+          }
+          .download-click,
+          .open-click {
+            color: @color-red-2;
           }
         }
       }

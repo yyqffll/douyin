@@ -187,6 +187,7 @@ export default {
     },
     registerSuccess () {
       this.success = true
+      this.time = 5
       this.timer = setInterval(() => {
         this.time--
         if (this.time < 1) {

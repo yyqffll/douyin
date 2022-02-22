@@ -2,6 +2,8 @@
 const express = require('express')
 const path = require('path')
 const fs = require('fs')
+const moment = require('moment')
+// console.log(moment(Date.now).format('YYYY'))
 const multer = require('multer')
 const FfmpegCommand = require('fluent-ffmpeg')
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path
@@ -119,6 +121,8 @@ function create (param, schema) {
 module.exports = {
   express,
   path,
+  fs,
+  moment,
   multer,
   FfmpegCommand,
   dyimgPath,

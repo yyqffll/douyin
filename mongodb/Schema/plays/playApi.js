@@ -8,6 +8,8 @@
 
 const utils = require('../../utils')
 const router = utils.express.Router()
+const Play = require('./play')
+const User = require('../users/user')
 
 const uploadDest = utils.multer({
   dest: utils.dyvideoPath
@@ -15,6 +17,10 @@ const uploadDest = utils.multer({
 
 const nameEnd = req => {
   return `-edit.${req.body.videoType}`
+}
+
+const videoImgPath = req => {
+  return utils.path.join(utils.dyimgPath, req.body.videoImgName)
 }
 
 const videoPath = req => {
@@ -142,5 +148,72 @@ router.post('/play/cut', (req, res) => {
       }
     })
   })
+})
+
+router.post('/play/add', (req, res) => {
+  if (req.body.videoName.includes('edit')) {
+    utils.deletFile(utils.path.join(utils.dyvideoPath, req.body.videoName.replace(nameEnd(req), '')))
+  }
+  utils.create(req.body, Play).then(videoData => {
+    utils.findOne({ userId: videoData.userId }, User).then(userData => {
+      User.updateOne(
+        { userId: userData.userId },
+        { userVideoCount: ++userData.userVideoCount },
+        { new: true }
+      )
+    })
+    res.json({
+      success: true,
+      msg: '视频发布成功!',
+      data: videoData
+    })
+  }).catch(err => {
+    res.json({
+      success: false,
+      msg: '视频发布失败!',
+      data: {
+        err
+      }
+    })
+  })
+})
+
+router.post('/play/findAll', (req, res) => {
+  try {
+    Play.find({}).limit(5).skip(req.body.length).then(data => {
+      const finalData = []
+      if (data.length > 0) {
+        data.forEach(item => {
+          const finalItem = JSON.parse(JSON.stringify(item))
+          finalItem.video = null
+          finalItem.img = null
+          utils.readFile(videoPath({ body: item })).then(data => {
+            console.log('video')
+            finalItem.video = data
+          })
+          utils.readFile(videoImgPath({ body: item })).then(data => {
+            console.log('img')
+            finalItem.img = data
+          })
+          finalData.push(finalItem)
+        })
+      }
+      setTimeout(() => {
+        res.json({
+          success: true,
+          msg: '获取视频成功!',
+          data: finalData
+        })
+      }, 100)
+    })
+  } catch (err) {
+    res.json({
+      success: false,
+      msg: '获取视频失败!',
+      data: {
+        err
+      }
+    })
+  }
 })
 module.exports = router
